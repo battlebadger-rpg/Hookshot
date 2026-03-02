@@ -1,0 +1,11 @@
+.env
+create_repo.py
+__pycache__/
+*.pyc
+*.db
+uploads/
+outputs/
+library_videos/
+dist/
+build/
+*.zip

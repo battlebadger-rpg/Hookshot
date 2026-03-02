@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot — Batch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
+header { padding: 16px 32px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; }
+header a:hover { color: #38bdf8; background: #f0f9ff; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 18px; }
+header .logo svg { width: 24px; height: 24px; }
+header .spacer { flex: 1; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
+.container { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 24px; margin-bottom: 24px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.card-sub { font-size: 13px; color: #999; margin-bottom: 16px; }
+.items { display: flex; flex-direction: column; gap: 8px; }
+.item { display: grid; grid-template-columns: 1fr 70px 110px 70px 60px 75px; gap: 12px; align-items: center; padding: 12px 14px; background: #fafafa; border-radius: 10px; font-size: 13px; }
+.item .caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .posted { font-size: 12px; color: #666; }
+.item input[type=number] { width: 70px; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 6px; font-size: 13px; }
+.btn { padding: 6px 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: #38bdf8; color: #fff; text-decoration: none; display: inline-block; }
+.btn:hover { background: #7dd3fc; }
+.btn-sm { padding: 4px 8px; font-size: 11px; }
+.btn-outline { background: #fff; border: 1px solid #e0e0e0; color: #666; }
+.btn-outline:hover { background: #f5f5f5; }
+.dl-all { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
+  <a href="/">Dashboard</a>
+  <a href="/library">Video Library</a>
+  <a href="/batches">Batches</a>
+  <a href="/report">Report</a>
+  <span class="spacer"></span>
+  <a href="/logout" class="signout">Sign out</a>
+</header>
+<div class="container">
+  <div class="card">
+    <div class="card-title" id="batchTitle">Batch</div>
+    <div class="card-sub" id="batchSub"></div>
+    <div class="dl-all"><a href="#" id="downloadAll" class="btn btn-outline">Download all (.zip)</a></div>
+    <div class="items" id="items"></div>
+  </div>
+</div>
+<script>
+const batchId = '{{ batch_id }}';
+const itemsEl = document.getElementById('items');
+const batchTitle = document.getElementById('batchTitle');
+const batchSub = document.getElementById('batchSub');
+const downloadAll = document.getElementById('downloadAll');
+downloadAll.href = '/download-all/' + batchId;
+
+fetch('/api/batches/' + batchId).then(r => r.json()).then(data => {
+  if (data.error) { batchTitle.textContent = 'Not found'; return; }
+  batchTitle.textContent = (data.account_name || '') + (data.week_of ? ' · ' + data.week_of : '');
+  batchSub.textContent = 'Created: ' + (data.created_at || '');
+  itemsEl.innerHTML = data.items.map(it => {
+    const posted = it.posted_at ? '<span class="posted">Posted</span>' : '<button type="button" class="btn btn-sm mark-posted" data-id="' + it.id + '">Mark posted</button>';
+    const viewsVal = it.views_48h != null ? it.views_48h : '';
+    const dl = it.output_filename ? '<a href="/download/' + batchId + '/' + it.output_filename + '" class="btn btn-sm btn-outline">Download</a>' : '<span class="meta">—</span>';
+    return '<div class="item" data-item-id="' + it.id + '"><span class="caption" title="' + (it.caption_preview || '').replace(/"/g, '&quot;') + '">' + (it.caption_preview || '') + '</span><span>' + it.video_id + '</span>' + posted + '<input type="number" class="views-input" placeholder="Views" value="' + viewsVal + '" min="0"><button type="button" class="btn btn-sm save-views">Save</button>' + dl + '</div>';
+  }).join('');
+  itemsEl.querySelectorAll('.mark-posted').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const res = await fetch('/api/batches/' + batchId + '/items/' + id + '/mark-posted', { method: 'POST' });
+      if (res.ok) { btn.replaceWith('<span class="posted">Posted</span>'); }
+    });
+  });
+  itemsEl.querySelectorAll('.save-views').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('.item');
+      const id = row.dataset.itemId;
+      const input = row.querySelector('.views-input');
+      const views = input.value.trim() ? parseInt(input.value, 10) : null;
+      const res = await fetch('/api/batches/' + batchId + '/items/' + id + '/views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ views_48h: views })
+      });
+      if (res.ok) { btn.textContent = 'Saved'; setTimeout(() => { btn.textContent = 'Save'; }, 1500); }
+    });
+  });
+}).catch(() => { batchTitle.textContent = 'Error loading batch'; });
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.login-wrap { max-width: 380px; padding: 24px; width: 100%; }
+.logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 32px; }
+.logo svg { width: 28px; height: 28px; color: #38bdf8; }
+.logo h1 { font-size: 20px; font-weight: 600; color: #38bdf8; }
+.card { background: #fff; border-radius: 20px; border: 1px solid #e8e8e8; padding: 32px; }
+.card-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.card-sub { font-size: 13px; color: #999; margin-bottom: 28px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: #888; margin-bottom: 6px; text-transform: uppercase; }
+.field input { width: 100%; padding: 13px 16px; border: 1px solid #e8e8e8; border-radius: 12px; font-size: 15px; outline: none; color: #1a1a1a; background: #fafafa; }
+.field input:focus { border-color: #bbb; background: #fff; }
+.error { background: #fff5f5; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #dc2626; margin-bottom: 16px; }
+.btn-login { width: 100%; padding: 14px; border: none; border-radius: 12px; background: #38bdf8; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.btn-login:hover { background: #7dd3fc; }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+    <h1>HookShot</h1>
+  </div>
+  <div class="card">
+    <div class="card-title">Sign in</div>
+    <div class="card-sub">Enter your username and PIN</div>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="POST" action="/login">
+      <div class="field"><label>Username</label><input type="text" name="username" placeholder="your name" autocomplete="username" required></div>
+      <div class="field"><label>PIN</label><input type="password" name="pin" placeholder="••••" inputmode="numeric" required></div>
+      <button type="submit" class="btn-login">Sign in</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

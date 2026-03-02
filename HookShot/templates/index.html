@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
+header { padding: 16px 32px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; }
+header a:hover { color: #38bdf8; background: #f0f9ff; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 18px; }
+header .logo svg { width: 24px; height: 24px; }
+header .spacer { flex: 1; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
+.container { max-width: 900px; margin: 32px auto; padding: 0 24px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 24px; margin-bottom: 24px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.card-sub { font-size: 13px; color: #999; margin-bottom: 16px; }
+select, input[type=text] { padding: 10px 14px; border: 1px solid #e8e8e8; border-radius: 10px; font-size: 14px; min-width: 200px; }
+.btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; background: #38bdf8; color: #fff; }
+.btn:hover { background: #7dd3fc; }
+.btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+.form-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.form-row label { min-width: 90px; font-size: 13px; color: #666; }
+.feedback { font-size: 13px; color: #666; margin-top: 12px; }
+.feedback.err { color: #dc2626; }
+.feedback.ok { color: #16a34a; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
+  <a href="/">Dashboard</a>
+  <a href="/library">Video Library</a>
+  <a href="/batches">Batches</a>
+  <a href="/report">Report</a>
+  <span class="spacer"></span>
+  <a href="/logout" class="signout">Sign out</a>
+</header>
+<div class="container">
+  <div class="card">
+    <div class="card-title">Create weekly batch</div>
+    <div class="card-sub">Generate 35 videos (5 per day × 7 days) for one account. Each video pairs a random library clip with a random caption.</div>
+    <div class="form-row">
+      <label>Account</label>
+      <select id="accountSelect"><option value="">Loading…</option></select>
+    </div>
+    <div class="form-row">
+      <label>Week (optional)</label>
+      <input type="text" id="weekOf" placeholder="e.g. 2025-W10">
+    </div>
+    <button class="btn" id="createBtn" disabled>Create 35-video batch</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+<script>
+const accountSelect = document.getElementById('accountSelect');
+const weekOf = document.getElementById('weekOf');
+const createBtn = document.getElementById('createBtn');
+const feedback = document.getElementById('feedback');
+
+fetch('/api/accounts').then(r => r.json()).then(data => {
+  accountSelect.innerHTML = '<option value="">Select account</option>' + data.accounts.map(a => '<option value="' + a.id + '">' + a.name + '</option>').join('');
+  createBtn.disabled = !data.accounts.length;
+});
+
+createBtn.addEventListener('click', async () => {
+  const account_id = accountSelect.value;
+  if (!account_id) return;
+  createBtn.disabled = true;
+  feedback.textContent = 'Creating batch…';
+  feedback.className = 'feedback';
+  try {
+    const res = await fetch('/api/batch/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account_id: parseInt(account_id, 10), week_of: weekOf.value.trim() || null })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      feedback.textContent = data.error || 'Error';
+      feedback.className = 'feedback err';
+      createBtn.disabled = false;
+      return;
+    }
+    feedback.textContent = 'Batch created: ' + data.files.length + ' videos. ';
+    feedback.className = 'feedback ok';
+    const a = document.createElement('a');
+    a.href = '/batch/' + data.batch_id;
+    a.textContent = 'Open batch';
+    a.style.marginLeft = '8px';
+    feedback.appendChild(a);
+    createBtn.disabled = false;
+  } catch (e) {
+    feedback.textContent = 'Request failed';
+    feedback.className = 'feedback err';
+    createBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
