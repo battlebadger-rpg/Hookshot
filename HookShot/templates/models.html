@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HookShot — Models</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
+
+header { padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; flex-shrink: 0; }
+
+header a:hover { color: #38bdf8; background: #f0f9ff; }
+
+header a.active { color: #38bdf8; }
+
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 17px; flex-shrink: 0; }
+
+header .logo svg { width: 22px; height: 22px; }
+
+header .spacer { flex: 1; min-width: 12px; }
+
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shrink: 0; }
+
+
+
+.container { max-width: 860px; margin: 24px auto; padding: 0 16px; }
+
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+
+.page-title { font-size: 20px; font-weight: 700; }
+
+.page-sub { font-size: 13px; color: #999; margin-top: 2px; }
+
+
+
+.btn { padding: 9px 16px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; background: #38bdf8; color: #fff; font-family: 'Inter', sans-serif; transition: background 0.15s; }
+
+.btn:hover { background: #7dd3fc; }
+
+.btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+
+.btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 8px; }
+
+.btn-ghost { background: none; color: #888; border: 1px solid #e8e8e8; }
+
+.btn-ghost:hover { background: #f5f5f5; color: #333; }
+
+.btn-danger { background: #fee2e2; color: #dc2626; border: none; }
+
+.btn-danger:hover { background: #fecaca; }
+
+.btn-success { background: #22c55e; color: #fff; }
+
+.btn-success:hover { background: #16a34a; }
+
+
+
+/* Model card */
+
+.model-card {
+
+  background: #fff; border-radius: 16px; border: 1px solid #e8e8e8;
+
+  padding: 20px; margin-bottom: 16px;
+
+}
+
+.model-header {
+
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+
+}
+
+.model-name { font-size: 17px; font-weight: 700; flex: 1; }
+
+.model-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+
+
+/* Account list */
+
+.account-list { display: flex; flex-direction: column; gap: 8px; }
+
+.account-row {
+
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+
+  background: #f8f8f8; border-radius: 10px; border: 1px solid #eee;
+
+}
+
+.account-name { flex: 1; font-size: 14px; font-weight: 500; }
+
+.account-actions { display: flex; gap: 6px; }
+
+.no-accounts { font-size: 13px; color: #bbb; padding: 8px 0; }
+
+
+
+/* Add account inline form */
+
+.add-account-form {
+
+  display: none; margin-top: 12px; padding-top: 12px;
+
+  border-top: 1px dashed #e8e8e8;
+
+}
+
+.add-account-form.open { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.inline-input {
+
+  flex: 1; min-width: 180px; padding: 8px 12px; border: 1px solid #e8e8e8;
+
+  border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none;
+
+}
+
+.inline-input:focus { border-color: #38bdf8; }
+
+.inline-error { font-size: 12px; color: #dc2626; width: 100%; }
+
+
+
+/* Add model form */
+
+.add-model-card {
+
+  background: #fff; border-radius: 16px; border: 2px dashed #e8e8e8;
+
+  padding: 20px; margin-bottom: 16px; display: none;
+
+}
+
+.add-model-card.open { display: block; }
+
+.add-model-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+.add-model-input {
+
+  flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid #e8e8e8;
+
+  border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; outline: none;
+
+}
+
+.add-model-input:focus { border-color: #38bdf8; }
+
+.add-model-feedback { font-size: 13px; margin-top: 8px; }
+
+.add-model-feedback.ok { color: #16a34a; }
+
+.add-model-feedback.err { color: #dc2626; }
+
+
+
+/* Reassign */
+
+.reassign-select {
+
+  padding: 7px 10px; border: 1px solid #38bdf8; border-radius: 8px;
+
+  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+
+  background: #fff;
+
+}
+
+
+
+/* Unassigned section */
+
+.unassigned-card {
+
+  background: #fffbeb; border-radius: 16px; border: 1px solid #fde68a;
+
+  padding: 20px; margin-bottom: 16px;
+
+}
+
+.unassigned-title { font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 12px; }
+
+.unassigned-note { font-size: 12px; color: #a16207; margin-bottom: 12px; }
+
+
+
+/* Edit model inline */
+
+.model-name-input {
+
+  font-size: 17px; font-weight: 700; flex: 1; padding: 4px 8px;
+
+  border: 1.5px solid #38bdf8; border-radius: 8px;
+
+  font-family: 'Inter', sans-serif; outline: none;
+
+}
+
+
+
+@media (max-width: 600px) {
+
+  .model-header { flex-direction: column; align-items: flex-start; }
+
+  .account-row { flex-wrap: wrap; }
+
+}
+
+
+/* Batch generation panel */
+.batch-panel {
+  display: none; margin-top: 14px; padding: 14px 16px;
+  background: #f0f9ff; border-radius: 12px; border: 1px solid #bae6fd;
+}
+.batch-panel.open { display: block; }
+.batch-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.batch-count-lbl { font-size: 13px; color: #555; }
+.batch-count-inp {
+  width: 72px; padding: 7px 10px; border: 1px solid #bae6fd;
+  border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; outline: none; text-align: center;
+}
+.batch-count-inp:focus { border-color: #38bdf8; }
+.progress-wrap { margin-top: 10px; }
+.progress-track { background: #e0f2fe; border-radius: 99px; height: 8px; overflow: hidden; }
+.progress-fill  { background: #38bdf8; height: 100%; border-radius: 99px; transition: width 0.4s; }
+.batch-status-txt { font-size: 12px; color: #555; margin-top: 6px; }
+.batch-dl-row { margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn-dl { background: #22c55e; color: #fff; }
+.btn-dl:hover { background: #16a34a; }
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+  <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
+
+  <a href="/">Dashboard</a>
+
+  <a href="/library">Video Library</a>
+
+  <a href="/captions">Captions</a>
+
+  <a href="/models" class="active">Models</a>
+
+  <a href="/batches">Batches</a>
+
+  <a href="/report">Report</a>
+
+  <span class="spacer"></span>
+
+  <a href="/logout" class="signout">Sign out</a>
+
+</header>
+
+
+
+<div class="container">
+
+  <div class="page-header">
+
+    <div>
+
+      <div class="page-title">Models</div>
+
+      <div class="page-sub">Manage model profiles and their Instagram accounts</div>
+
+    </div>
+
+    <button class="btn" id="addModelBtn">+ Add model</button>
+
+  </div>
+
+
+
+  <div class="add-model-card" id="addModelCard">
+
+    <div class="add-model-form">
+
+      <input class="add-model-input" id="addModelInput" type="text" placeholder="Model name (e.g. Annabelle)">
+
+      <button class="btn btn-success" id="addModelSave">Add model</button>
+
+      <button class="btn btn-ghost" id="addModelCancel">Cancel</button>
+
+    </div>
+
+    <div class="add-model-feedback" id="addModelFeedback"></div>
+
+  </div>
+
+
+
+  <div id="modelList">
+
+    <div style="color:#bbb;text-align:center;padding:40px;font-size:14px">Loading…</div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+let modelsData = [];
+
+let unassignedData = [];
+
+
+
+async function load() {
+
+  const res = await fetch('/api/models');
+
+  const data = await res.json();
+
+  modelsData = data.models;
+
+  unassignedData = data.unassigned;
+
+  render();
+
+}
+
+
+
+function escHtml(s) {
+
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+}
+
+
+
+function modelOptions(excludeId) {
+
+  return modelsData
+
+    .filter(m => m.id !== excludeId)
+
+    .map(m => `<option value="${m.id}">${escHtml(m.name)}</option>`)
+
+    .join('');
+
+}
+
+
+
+function render() {
+
+  const list = document.getElementById('modelList');
+
+  let html = '';
+
+
+
+  if (!modelsData.length && !unassignedData.length) {
+
+    html = '<div style="color:#bbb;text-align:center;padding:40px;font-size:14px">No models yet. Click "+ Add model" to get started.</div>';
+
+  }
+
+
+
+  // Unassigned accounts
+
+  if (unassignedData.length) {
+
+    html += `
+
+      <div class="unassigned-card">
+
+        <div class="unassigned-title">⚠ Unassigned accounts (${unassignedData.length})</div>
+
+        <div class="unassigned-note">These accounts aren't linked to a model. Use the Reassign button to assign them.</div>
+
+        <div class="account-list">
+
+          ${unassignedData.map(a => `
+
+            <div class="account-row" id="acc-${a.id}">
+
+              <span class="account-name">@${escHtml(a.name)}</span>
+
+              <div class="account-actions">
+
+                <select class="reassign-select" id="reassign-${a.id}" onchange="reassignAccount(${a.id}, this.value)">
+
+                  <option value="">Assign to model…</option>
+
+                  ${modelOptions(null)}
+
+                </select>
+
+                <button class="btn btn-danger btn-sm" onclick="deleteAccount(${a.id}, '${escHtml(a.name)}')">Delete</button>
+
+              </div>
+
+            </div>
+
+          `).join('')}
+
+        </div>
+
+      </div>`;
+
+  }
+
+
+
+  // Model cards
+
+  html += modelsData.map(m => `
+
+    <div class="model-card" id="model-${m.id}">
+
+      <div class="model-header">
+
+        <span class="model-name" id="mname-${m.id}">${escHtml(m.name)}</span>
+
+        <div class="model-actions">
+
+          <button class="btn btn-ghost btn-sm" onclick="startRenameModel(${m.id})">Rename</button>
+          <button class="btn btn-ghost btn-sm" onclick="openBatchPanel(${m.id})">&#8659; Batch</button>
+
+          <button class="btn btn-danger btn-sm" onclick="deleteModel(${m.id}, '${escHtml(m.name)}')">Delete</button>
+
+        </div>
+
+      </div>
+
+      <div class="account-list" id="accounts-${m.id}">
+
+        ${m.accounts.length === 0
+
+          ? '<div class="no-accounts">No accounts yet — add one below</div>'
+
+          : m.accounts.map(a => accountRowHtml(a, m.id)).join('')
+
+        }
+
+      </div>
+
+      <div class="add-account-form" id="addAccForm-${m.id}">
+
+        <input class="inline-input" id="addAccInput-${m.id}" type="text" placeholder="Instagram handle (e.g. annabelle.karel)">
+
+        <button class="btn btn-success btn-sm" onclick="saveNewAccount(${m.id})">Add</button>
+
+        <button class="btn btn-ghost btn-sm" onclick="closeAddAccount(${m.id})">Cancel</button>
+
+        <span class="inline-error" id="addAccErr-${m.id}"></span>
+
+      </div>
+
+      <div style="margin-top:12px">
+
+        <button class="btn btn-ghost btn-sm" onclick="openAddAccount(${m.id})">+ Add account</button>
+      </div>
+      <div class="batch-panel" id="batchPanel-${m.id}">
+        <div class="batch-controls">
+          <span class="batch-count-lbl">Generate</span>
+          <input class="batch-count-inp" type="number" id="batchCount-${m.id}" value="140" min="1" max="500">
+          <span class="batch-count-lbl">videos for ${escHtml(m.name)}</span>
+          <button class="btn btn-sm" id="batchStartBtn-${m.id}" onclick="startBatchGen(${m.id}, '${escHtml(m.name)}')">Generate</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeBatchPanel(${m.id})">Cancel</button>
+        </div>
+        <div class="progress-wrap" id="batchProgress-${m.id}" style="display:none">
+          <div class="progress-track"><div class="progress-fill" id="batchFill-${m.id}" style="width:0%"></div></div>
+          <div class="batch-status-txt" id="batchStatus-${m.id}">Starting…</div>
+        </div>
+        <div class="batch-dl-row" id="batchDone-${m.id}" style="display:none">
+          <a class="btn btn-sm btn-dl" id="batchDlLink-${m.id}" href="#" download>⬇ Download ZIP</a>
+          <span class="batch-status-txt" id="batchDoneText-${m.id}"></span>
+        </div>
+      </div>
+
+    </div>
+  `).join('');
+
+
+
+  list.innerHTML = html;
+
+}
+
+
+
+function accountRowHtml(a, modelId) {
+
+  return `
+
+    <div class="account-row" id="acc-${a.id}">
+
+      <span class="account-name">@${escHtml(a.name)}</span>
+
+      <div class="account-actions">
+
+        <select class="reassign-select" onchange="reassignAccount(${a.id}, this.value)" title="Move to another model">
+
+          <option value="">Move to…</option>
+
+          ${modelOptions(modelId)}
+
+        </select>
+
+        <button class="btn btn-danger btn-sm" onclick="deleteAccount(${a.id}, '${escHtml(a.name)}')">Delete</button>
+
+      </div>
+
+    </div>`;
+
+}
+
+
+
+// ── Model actions ──────────────────────────────────────────────────────────
+
+function startRenameModel(id) {
+
+  const nameEl = document.getElementById(`mname-${id}`);
+
+  const current = modelsData.find(m => m.id === id).name;
+
+  nameEl.outerHTML = `<input class="model-name-input" id="mname-${id}" type="text" value="${escHtml(current)}"
+
+    onblur="cancelRenameModel(${id})"
+
+    onkeydown="if(event.key==='Enter')saveRenameModel(${id}); if(event.key==='Escape')cancelRenameModel(${id})">`;
+
+  document.getElementById(`mname-${id}`).focus();
+
+}
+
+
+
+function cancelRenameModel(id) {
+
+  const m = modelsData.find(m => m.id === id);
+
+  if (!m) return;
+
+  const input = document.getElementById(`mname-${id}`);
+
+  if (input) input.outerHTML = `<span class="model-name" id="mname-${id}">${escHtml(m.name)}</span>`;
+
+}
+
+
+
+async function saveRenameModel(id) {
+
+  const input = document.getElementById(`mname-${id}`);
+
+  if (!input) return;
+
+  const name = input.value.trim();
+
+  if (!name) return;
+
+  const res = await fetch(`/api/models/${id}`, {
+
+    method: 'PUT',
+
+    headers: { 'Content-Type': 'application/json' },
+
+    body: JSON.stringify({ name })
+
+  });
+
+  if (res.ok) {
+
+    modelsData.find(m => m.id === id).name = name;
+
+    input.outerHTML = `<span class="model-name" id="mname-${id}">${escHtml(name)}</span>`;
+
+  } else {
+
+    const d = await res.json();
+
+    alert(d.error || 'Could not rename');
+
+  }
+
+}
+
+
+
+async function deleteModel(id, name) {
+
+  if (!confirm(`Delete model "${name}"?\nAll accounts must be unassigned or deleted first.`)) return;
+
+  const res = await fetch(`/api/models/${id}`, { method: 'DELETE' });
+
+  const d = await res.json();
+
+  if (res.ok) {
+
+    modelsData = modelsData.filter(m => m.id !== id);
+
+    render();
+
+  } else {
+
+    alert(d.error || 'Could not delete');
+
+  }
+
+}
+
+
+
+// ── Account actions ────────────────────────────────────────────────────────
+
+function openAddAccount(modelId) {
+
+  document.getElementById(`addAccForm-${modelId}`).classList.add('open');
+
+  document.getElementById(`addAccInput-${modelId}`).focus();
+
+}
+
+function closeAddAccount(modelId) {
+
+  document.getElementById(`addAccForm-${modelId}`).classList.remove('open');
+
+  document.getElementById(`addAccInput-${modelId}`).value = '';
+
+  document.getElementById(`addAccErr-${modelId}`).textContent = '';
+
+}
+
+
+
+async function saveNewAccount(modelId) {
+
+  const input = document.getElementById(`addAccInput-${modelId}`);
+
+  const name = input.value.trim();
+
+  const errEl = document.getElementById(`addAccErr-${modelId}`);
+
+  if (!name) { errEl.textContent = 'Account name is required'; return; }
+
+  const res = await fetch(`/api/models/${modelId}/accounts`, {
+
+    method: 'POST',
+
+    headers: { 'Content-Type': 'application/json' },
+
+    body: JSON.stringify({ name })
+
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+
+    const m = modelsData.find(m => m.id === modelId);
+
+    m.accounts.push({ id: data.id, name: data.name });
+
+    input.value = '';
+
+    errEl.textContent = '';
+
+    render();
+
+  } else {
+
+    errEl.textContent = data.error || 'Error';
+
+  }
+
+}
+
+
+
+async function reassignAccount(accId, modelIdStr) {
+
+  if (!modelIdStr) return;
+
+  const modelId = parseInt(modelIdStr);
+
+  const res = await fetch(`/api/accounts/${accId}`, {
+
+    method: 'PUT',
+
+    headers: { 'Content-Type': 'application/json' },
+
+    body: JSON.stringify({ model_id: modelId })
+
+  });
+
+  if (res.ok) {
+
+    await load();
+
+  } else {
+
+    const d = await res.json();
+
+    alert(d.error || 'Could not reassign');
+
+  }
+
+}
+
+
+
+async function deleteAccount(accId, name) {
+
+  if (!confirm(`Delete account "@${name}"?\nThis cannot be undone.`)) return;
+
+  const res = await fetch(`/api/accounts/${accId}`, { method: 'DELETE' });
+
+  const d = await res.json();
+
+  if (res.ok) {
+
+    modelsData.forEach(m => { m.accounts = m.accounts.filter(a => a.id !== accId); });
+
+    unassignedData = unassignedData.filter(a => a.id !== accId);
+
+    render();
+
+  } else {
+
+    alert(d.error || 'Could not delete');
+
+  }
+
+}
+
+
+
+// ── Add model form ─────────────────────────────────────────────────────────
+
+document.getElementById('addModelBtn').addEventListener('click', () => {
+
+  document.getElementById('addModelCard').classList.toggle('open');
+
+  document.getElementById('addModelInput').focus();
+
+});
+
+document.getElementById('addModelCancel').addEventListener('click', () => {
+
+  document.getElementById('addModelCard').classList.remove('open');
+
+  document.getElementById('addModelInput').value = '';
+
+  document.getElementById('addModelFeedback').textContent = '';
+
+});
+
+document.getElementById('addModelSave').addEventListener('click', async () => {
+
+  const name = document.getElementById('addModelInput').value.trim();
+
+  const fb = document.getElementById('addModelFeedback');
+
+  if (!name) { fb.textContent = 'Name is required'; fb.className = 'add-model-feedback err'; return; }
+
+  const btn = document.getElementById('addModelSave');
+
+  btn.disabled = true;
+
+  const res = await fetch('/api/models', {
+
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+
+    body: JSON.stringify({ name })
+
+  });
+
+  btn.disabled = false;
+
+  const data = await res.json();
+
+  if (res.ok) {
+
+    modelsData.push({ id: data.id, name: data.name, accounts: [] });
+
+    document.getElementById('addModelInput').value = '';
+
+    document.getElementById('addModelCard').classList.remove('open');
+
+    fb.textContent = '';
+
+    render();
+
+  } else {
+
+    fb.textContent = data.error || 'Error';
+
+    fb.className = 'add-model-feedback err';
+
+  }
+
+});
+
+
+
+// ── Batch generation ───────────────────────────────────────────────────────
+const _batchPollers = {};
+
+function openBatchPanel(modelId) {
+  document.getElementById(`batchPanel-${modelId}`).classList.add('open');
+  const btn = document.getElementById(`batchStartBtn-${modelId}`);
+  if (btn) { btn.disabled = false; btn.textContent = 'Generate'; }
+  const prog = document.getElementById(`batchProgress-${modelId}`);
+  if (prog) prog.style.display = 'none';
+  const done = document.getElementById(`batchDone-${modelId}`);
+  if (done) done.style.display = 'none';
+}
+
+function closeBatchPanel(modelId) {
+  document.getElementById(`batchPanel-${modelId}`).classList.remove('open');
+  if (_batchPollers[modelId]) { clearTimeout(_batchPollers[modelId]); delete _batchPollers[modelId]; }
+}
+
+async function startBatchGen(modelId, modelName) {
+  const count = parseInt(document.getElementById(`batchCount-${modelId}`).value) || 140;
+  const btn   = document.getElementById(`batchStartBtn-${modelId}`);
+  btn.disabled = true; btn.textContent = 'Starting…';
+  const res  = await fetch('/api/batch-generate', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model_name: modelName, count }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    btn.disabled = false; btn.textContent = 'Generate';
+    alert(data.error || 'Failed to start batch'); return;
+  }
+  document.getElementById(`batchProgress-${modelId}`).style.display = 'block';
+  document.getElementById(`batchStatus-${modelId}`).textContent = 'Rendering…';
+  pollBatchJob(modelId, data.job_id);
+}
+
+async function pollBatchJob(modelId, jobId) {
+  try {
+    const res  = await fetch(`/api/batch-status/${jobId}`);
+    const data = await res.json();
+    const pct  = data.total > 0 ? Math.round((data.done / data.total) * 100) : 0;
+    document.getElementById(`batchFill-${modelId}`).style.width = pct + '%';
+    if (data.status === 'complete') {
+      document.getElementById(`batchStatus-${modelId}`).textContent = `✓ ${data.done} videos ready`;
+      const doneRow = document.getElementById(`batchDone-${modelId}`);
+      doneRow.style.display = 'flex';
+      document.getElementById(`batchDlLink-${modelId}`).href = `/api/batch-download/${jobId}`;
+      document.getElementById(`batchDoneText-${modelId}`).textContent = `${data.done} MP4s — click to download zip`;
+    } else if (data.status === 'error') {
+      document.getElementById(`batchStatus-${modelId}`).textContent = `✗ ${data.error || 'Unknown error'}`;
+    } else {
+      document.getElementById(`batchStatus-${modelId}`).textContent = `${data.done} / ${data.total} rendered…`;
+      _batchPollers[modelId] = setTimeout(() => pollBatchJob(modelId, jobId), 2500);
+    }
+  } catch(e) {
+    document.getElementById(`batchStatus-${modelId}`).textContent = 'Retrying…';
+    _batchPollers[modelId] = setTimeout(() => pollBatchJob(modelId, jobId), 5000);
+  }
+}
+
+
+load();
+
+</script>
+
+</body>
+
+</html>
+

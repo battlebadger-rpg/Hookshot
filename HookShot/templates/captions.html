@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot — Captions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
+header { padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; flex-shrink: 0; }
+header a:hover { color: #38bdf8; background: #f0f9ff; }
+header a.active { color: #38bdf8; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 17px; flex-shrink: 0; }
+header .logo svg { width: 22px; height: 22px; }
+header .spacer { flex: 1; min-width: 12px; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shrink: 0; }
+
+.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 20px; margin-bottom: 20px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.card-sub { font-size: 13px; color: #999; margin-bottom: 16px; }
+
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.search-input {
+  padding: 9px 14px; border: 1px solid #e8e8e8; border-radius: 10px;
+  font-size: 14px; font-family: 'Inter', sans-serif; outline: none;
+  flex: 1; min-width: 160px; max-width: 280px;
+}
+.search-input:focus { border-color: #38bdf8; }
+.filter-select {
+  padding: 9px 12px; border: 1px solid #e8e8e8; border-radius: 10px;
+  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+  background: #fff; cursor: pointer;
+}
+.filter-select:focus { border-color: #38bdf8; }
+.count-badge { font-size: 13px; color: #999; white-space: nowrap; }
+.toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+
+.btn { padding: 9px 16px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; background: #38bdf8; color: #fff; font-family: 'Inter', sans-serif; transition: background 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.btn:hover { background: #7dd3fc; }
+.btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+.btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+.btn-ghost { background: none; color: #555; border: 1px solid #e0e0e0; }
+.btn-ghost:hover { background: #f5f5f5; color: #333; border-color: #ccc; }
+.btn-danger { background: #fee2e2; color: #dc2626; border: none; }
+.btn-danger:hover { background: #fecaca; }
+.btn-save { background: #22c55e; color: #fff; border: none; }
+.btn-save:hover { background: #16a34a; }
+.btn-archive { background: #fef3c7; color: #92400e; border: none; }
+.btn-archive:hover { background: #fde68a; }
+.btn-restore { background: #dcfce7; color: #166534; border: none; }
+.btn-restore:hover { background: #bbf7d0; }
+.btn-import { background: #ede9fe; color: #5b21b6; border: none; }
+.btn-import:hover { background: #ddd6fe; }
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { padding: 9px 10px; text-align: left; font-size: 11px; font-weight: 600; color: #999; border-bottom: 2px solid #eee; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.03em; }
+td { padding: 10px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafa; }
+tr.archived td { opacity: 0.5; }
+tr.archived:hover td { opacity: 0.75; background: #fff8f0; }
+.cap-text { line-height: 1.5; color: #333; }
+.cat-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  white-space: nowrap;
+}
+.cat-Social { background: #dbeafe; color: #1e40af; }
+.cat-Dark { background: #fce7f3; color: #9d174d; }
+.cat-Innuendo { background: #fef3c7; color: #92400e; }
+.cat-Relatable { background: #dcfce7; color: #166534; }
+.cat-Thought { background: #ede9fe; color: #5b21b6; }
+.cat-Flat { background: #e0f2fe; color: #0369a1; }
+.cat-Men { background: #fff7ed; color: #c2410c; }
+.cat-Unhinged { background: #fdf2f8; color: #86198f; }
+.cat-Daddy { background: #fdf4ff; color: #7e22ce; }
+.cat-SideChick { background: #fff1f2; color: #be123c; }
+
+.model-tags { display: flex; flex-wrap: wrap; gap: 3px; max-width: 160px; }
+.model-tag { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 5px; background: #f0f4ff; color: #3730a3; white-space: nowrap; }
+.no-models { font-size: 11px; color: #bbb; font-style: italic; }
+.archived-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; background: #f5f5f5; color: #999; border-radius: 5px; white-space: nowrap; }
+
+.stat { font-size: 12px; color: #999; white-space: nowrap; }
+.actions { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+
+/* Edit row */
+.edit-row td { background: #f0f9ff; padding: 12px 10px; }
+.edit-form { display: flex; flex-direction: column; gap: 10px; }
+.edit-textarea {
+  width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid #38bdf8;
+  border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;
+  resize: vertical; outline: none; line-height: 1.5;
+}
+.edit-select {
+  padding: 8px 12px; border: 1px solid #e8e8e8; border-radius: 8px;
+  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+  background: #fff; max-width: 220px;
+}
+.edit-select:focus { border-color: #38bdf8; }
+.edit-models-input {
+  padding: 8px 12px; border: 1px solid #e8e8e8; border-radius: 8px;
+  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+  max-width: 360px; width: 100%;
+}
+.edit-models-input:focus { border-color: #38bdf8; }
+.edit-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.edit-error { font-size: 12px; color: #dc2626; }
+.edit-label { font-size: 12px; color: #666; font-weight: 500; }
+
+/* Add form */
+.add-section { border-top: 1px solid #eee; margin-top: 16px; padding-top: 16px; display: none; }
+.add-section.open { display: block; }
+.add-form { display: flex; flex-direction: column; gap: 10px; max-width: 640px; }
+.add-textarea {
+  width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid #e8e8e8;
+  border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;
+  resize: vertical; outline: none; line-height: 1.5;
+}
+.add-textarea:focus { border-color: #38bdf8; }
+.add-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.add-select {
+  padding: 9px 12px; border: 1px solid #e8e8e8; border-radius: 8px;
+  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+  background: #fff;
+}
+.add-select:focus { border-color: #38bdf8; }
+.feedback { font-size: 13px; margin-top: 8px; }
+.feedback.ok { color: #16a34a; }
+.feedback.err { color: #dc2626; }
+
+/* Import panel */
+.import-panel {
+  background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 20px; display: none;
+}
+.import-panel.open { display: block; }
+.import-panel h3 { font-size: 14px; font-weight: 600; color: #5b21b6; margin-bottom: 8px; }
+.import-panel p { font-size: 13px; color: #6b7280; margin-bottom: 14px; line-height: 1.5; }
+.import-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.import-file-label {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+  border: 1.5px dashed #c4b5fd; border-radius: 8px; font-size: 13px; font-weight: 500;
+  color: #5b21b6; cursor: pointer; background: #fff; transition: background 0.15s;
+}
+.import-file-label:hover { background: #f5f0ff; }
+.import-file-input { display: none; }
+.import-filename { font-size: 13px; color: #555; }
+.import-result { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
+.import-result.ok { background: #dcfce7; color: #166534; display: block; }
+.import-result.err { background: #fee2e2; color: #dc2626; display: block; }
+
+@media (max-width: 640px) {
+  .toolbar { gap: 8px; }
+  .search-input { max-width: 100%; }
+  td, th { padding: 8px 7px; }
+  .model-tags { max-width: 100px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
+  <a href="/">Dashboard</a>
+  <a href="/library">Video Library</a>
+  <a href="/captions" class="active">Captions</a>
+  <a href="/models">Models</a>
+  <a href="/batches">Batches</a>
+  <a href="/report">Report</a>
+  <span class="spacer"></span>
+  <a href="/logout" class="signout">Sign out</a>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div class="card-title">Caption library</div>
+    <div class="card-sub">Manage text overlays for batch generation. Export to edit offline, then import to update all at once.</div>
+
+    <!-- Import panel -->
+    <div class="import-panel" id="importPanel">
+      <h3>Import captions from spreadsheet</h3>
+      <p>Upload a CSV with columns: <strong>ID, Category, Caption, Times Used, Total Views, Models, Active</strong>.<br>
+         Existing captions will be updated, new ones added, and any not in the file will be archived automatically.</p>
+      <div class="import-row">
+        <label class="import-file-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Choose CSV file
+          <input type="file" accept=".csv" class="import-file-input" id="importFileInput">
+        </label>
+        <span class="import-filename" id="importFilename">No file chosen</span>
+        <button class="btn btn-sm btn-import" id="importRunBtn" disabled>Import &amp; update</button>
+        <button class="btn btn-sm btn-ghost" id="importCancelBtn">Cancel</button>
+      </div>
+      <div class="import-result" id="importResult"></div>
+    </div>
+
+    <div class="toolbar">
+      <input class="search-input" id="searchInput" type="text" placeholder="Search captions…">
+      <select class="filter-select" id="catFilter">
+        <option value="">All categories</option>
+        <option>Social Commentary</option>
+        <option>Dark Humor</option>
+        <option>Innuendo</option>
+        <option>Relatable Humor</option>
+        <option>Thought Provoking</option>
+        <option>Flat Commentary</option>
+        <option>Men / Relationships</option>
+        <option>Unhinged / Chaotic</option>
+        <option>Daddy / Good Girl</option>
+        <option>Side Chick</option>
+      </select>
+      <select class="filter-select" id="statusFilter">
+        <option value="active">Active only</option>
+        <option value="all">All (incl. archived)</option>
+        <option value="archived">Archived only</option>
+      </select>
+      <span class="count-badge" id="countBadge"></span>
+      <div class="toolbar-actions">
+        <a href="/api/captions/export" class="btn btn-ghost btn-sm" download="caption_library_export.csv">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </a>
+        <button class="btn btn-sm btn-import" id="importBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import
+        </button>
+        <button class="btn btn-sm" id="addBtn">+ Add caption</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="captionTable">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th style="width:110px">Category</th>
+            <th>Caption</th>
+            <th style="width:150px">Models</th>
+            <th style="width:55px">Used</th>
+            <th style="width:70px">Views</th>
+            <th style="width:110px"></th>
+          </tr>
+        </thead>
+        <tbody id="captionBody">
+          <tr><td colspan="7" style="color:#bbb;text-align:center;padding:32px">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="add-section" id="addSection">
+      <div class="add-form">
+        <textarea class="add-textarea" id="addText" placeholder="Type the caption text here…"></textarea>
+        <div class="add-row">
+          <select class="add-select" id="addCat">
+            <option value="">Select category</option>
+            <option>Social Commentary</option>
+            <option>Dark Humor</option>
+            <option>Innuendo</option>
+            <option>Relatable Humor</option>
+            <option>Thought Provoking</option>
+            <option>Flat Commentary</option>
+            <option>Men / Relationships</option>
+            <option>Unhinged / Chaotic</option>
+            <option>Daddy / Good Girl</option>
+            <option>Side Chick</option>
+          </select>
+          <button class="btn btn-save btn-sm" id="addSaveBtn">Save caption</button>
+          <button class="btn btn-ghost btn-sm" id="addCancelBtn">Cancel</button>
+        </div>
+        <div class="feedback" id="addFeedback"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = ['Social Commentary','Dark Humor','Innuendo','Relatable Humor','Thought Provoking','Flat Commentary','Men / Relationships','Unhinged / Chaotic','Daddy / Good Girl','Side Chick'];
+const CAT_KEY = { 'Social Commentary':'Social','Dark Humor':'Dark','Innuendo':'Innuendo','Relatable Humor':'Relatable','Thought Provoking':'Thought','Flat Commentary':'Flat','Men / Relationships':'Men','Unhinged / Chaotic':'Unhinged','Daddy / Good Girl':'Daddy','Side Chick':'SideChick' };
+
+let allCaptions = [];
+let editingId = null;
+
+async function loadCaptions() {
+  const res = await fetch('/api/captions');
+  const data = await res.json();
+  allCaptions = data.captions;
+  renderTable();
+}
+
+function catBadge(cat) {
+  const key = CAT_KEY[cat] || 'Social';
+  return `<span class="cat-badge cat-${key}">${cat}</span>`;
+}
+
+function modelTags(modelsStr) {
+  if (!modelsStr) return '<span class="no-models">All models</span>';
+  const names = modelsStr.split(';').map(s => s.trim()).filter(Boolean);
+  if (!names.length) return '<span class="no-models">All models</span>';
+  return `<div class="model-tags">${names.map(n => `<span class="model-tag">${escHtml(n)}</span>`).join('')}</div>`;
+}
+
+function renderTable() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const catF = document.getElementById('catFilter').value;
+  const statusF = document.getElementById('statusFilter').value;
+  const filtered = allCaptions.filter(c => {
+    const matchCat = !catF || c.category === catF;
+    const matchSearch = !search || c.caption.toLowerCase().includes(search) || c.id.includes(search);
+    const matchStatus = statusF === 'all' ||
+                        (statusF === 'active' && c.active) ||
+                        (statusF === 'archived' && !c.active);
+    return matchCat && matchSearch && matchStatus;
+  });
+
+  document.getElementById('countBadge').textContent = `${filtered.length} of ${allCaptions.length} captions`;
+  const tbody = document.getElementById('captionBody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:#bbb;text-align:center;padding:32px">No captions found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => `
+    <tr data-id="${c.id}" class="${c.active ? '' : 'archived'}">
+      <td class="stat">${c.id}${c.active ? '' : ' <span class="archived-badge">archived</span>'}</td>
+      <td>${catBadge(c.category)}</td>
+      <td class="cap-text">${escHtml(c.caption)}</td>
+      <td>${modelTags(c.models)}</td>
+      <td class="stat">${c.times_used}</td>
+      <td class="stat">${c.total_views > 0 ? c.total_views.toLocaleString() : '—'}</td>
+      <td class="actions">
+        <button class="btn btn-ghost btn-sm" onclick="startEdit('${c.id}')">Edit</button>
+        ${c.active
+          ? `<button class="btn btn-archive btn-sm" onclick="toggleActive('${c.id}', false)" title="Archive this caption">Archive</button>`
+          : `<button class="btn btn-restore btn-sm" onclick="toggleActive('${c.id}', true)" title="Restore this caption">Restore</button>`}
+      </td>
+    </tr>
+  `).join('');
+
+  if (editingId) {
+    const cap = allCaptions.find(c => c.id === editingId);
+    if (cap) insertEditRow(cap);
+  }
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function startEdit(id) {
+  editingId = id;
+  const cap = allCaptions.find(c => c.id === id);
+  if (!cap) return;
+  renderTable();
+  insertEditRow(cap);
+}
+
+function insertEditRow(cap) {
+  const row = document.querySelector(`tr[data-id="${cap.id}"]`);
+  if (!row) return;
+  const catOptions = CATEGORIES.map(c =>
+    `<option value="${c}" ${c === cap.category ? 'selected' : ''}>${c}</option>`
+  ).join('');
+  const editRow = document.createElement('tr');
+  editRow.className = 'edit-row';
+  editRow.id = 'editRow';
+  editRow.innerHTML = `
+    <td colspan="7">
+      <div class="edit-form">
+        <textarea class="edit-textarea" id="editText">${escHtml(cap.caption)}</textarea>
+        <div class="edit-actions">
+          <select class="edit-select" id="editCat">${catOptions}</select>
+        </div>
+        <div class="edit-actions">
+          <span class="edit-label">Models (semicolon-separated):</span>
+          <input type="text" class="edit-models-input" id="editModels" value="${escHtml(cap.models || '')}" placeholder="e.g. Annabelle;Sylvia (blank = all models)">
+        </div>
+        <div class="edit-actions">
+          <button class="btn btn-save btn-sm" onclick="saveEdit('${cap.id}')">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">Cancel</button>
+          <span class="edit-error" id="editError"></span>
+        </div>
+      </div>
+    </td>
+  `;
+  row.insertAdjacentElement('afterend', editRow);
+  row.querySelectorAll('.actions button').forEach(b => b.disabled = true);
+  document.getElementById('editText').focus();
+}
+
+function cancelEdit() {
+  editingId = null;
+  renderTable();
+}
+
+async function saveEdit(id) {
+  const text = document.getElementById('editText').value.trim();
+  const cat = document.getElementById('editCat').value;
+  const models = document.getElementById('editModels').value.trim();
+  if (!text) { document.getElementById('editError').textContent = 'Caption text is required'; return; }
+  const saveBtn = document.querySelector('#editRow .btn-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  const cap = allCaptions.find(c => c.id === id);
+  const res = await fetch(`/api/captions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ caption: text, category: cat, models: models, active: cap ? cap.active : true })
+  });
+  if (res.ok) {
+    if (cap) { cap.caption = text; cap.category = cat; cap.models = models; }
+    editingId = null;
+    renderTable();
+  } else {
+    const d = await res.json();
+    document.getElementById('editError').textContent = d.error || 'Error saving';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save';
+  }
+}
+
+async function toggleActive(id, makeActive) {
+  const cap = allCaptions.find(c => c.id === id);
+  if (!cap) return;
+  const action = makeActive ? 'restore' : 'archive';
+  if (!confirm(`${makeActive ? 'Restore' : 'Archive'} caption #${id}?\n\n"${cap.caption.slice(0, 80)}…"`)) return;
+  const res = await fetch(`/api/captions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ caption: cap.caption, category: cap.category, models: cap.models || '', active: makeActive })
+  });
+  if (res.ok) {
+    cap.active = makeActive;
+    renderTable();
+  } else {
+    const d = await res.json();
+    alert(d.error || `Could not ${action} caption`);
+  }
+}
+
+// ── Add new caption ──────────────────────────────────────────────────────────
+document.getElementById('addBtn').addEventListener('click', () => {
+  const section = document.getElementById('addSection');
+  const isOpen = section.classList.contains('open');
+  section.classList.toggle('open', !isOpen);
+  document.getElementById('addBtn').textContent = isOpen ? '+ Add caption' : '✕ Cancel';
+  if (!isOpen) document.getElementById('addText').focus();
+});
+
+document.getElementById('addCancelBtn').addEventListener('click', () => {
+  document.getElementById('addSection').classList.remove('open');
+  document.getElementById('addBtn').textContent = '+ Add caption';
+  document.getElementById('addText').value = '';
+  document.getElementById('addCat').value = '';
+  document.getElementById('addFeedback').textContent = '';
+});
+
+document.getElementById('addSaveBtn').addEventListener('click', async () => {
+  const text = document.getElementById('addText').value.trim();
+  const cat = document.getElementById('addCat').value;
+  const fb = document.getElementById('addFeedback');
+  if (!text) { fb.textContent = 'Caption text is required'; fb.className = 'feedback err'; return; }
+  if (!cat) { fb.textContent = 'Please select a category'; fb.className = 'feedback err'; return; }
+  const btn = document.getElementById('addSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const res = await fetch('/api/captions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ caption: text, category: cat })
+  });
+  const data = await res.json();
+  btn.disabled = false; btn.textContent = 'Save caption';
+  if (res.ok) {
+    allCaptions.push(data);
+    document.getElementById('addText').value = '';
+    document.getElementById('addCat').value = '';
+    fb.textContent = `Caption #${data.id} added successfully`;
+    fb.className = 'feedback ok';
+    renderTable();
+    setTimeout(() => { fb.textContent = ''; }, 3000);
+  } else {
+    fb.textContent = data.error || 'Error adding caption';
+    fb.className = 'feedback err';
+  }
+});
+
+// ── Import ───────────────────────────────────────────────────────────────────
+document.getElementById('importBtn').addEventListener('click', () => {
+  const panel = document.getElementById('importPanel');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    document.getElementById('importResult').className = 'import-result';
+    document.getElementById('importResult').textContent = '';
+  }
+});
+
+document.getElementById('importCancelBtn').addEventListener('click', () => {
+  document.getElementById('importPanel').classList.remove('open');
+  document.getElementById('importFilename').textContent = 'No file chosen';
+  document.getElementById('importFileInput').value = '';
+  document.getElementById('importRunBtn').disabled = true;
+  document.getElementById('importResult').className = 'import-result';
+});
+
+document.getElementById('importFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    document.getElementById('importFilename').textContent = file.name;
+    document.getElementById('importRunBtn').disabled = false;
+  }
+});
+
+document.getElementById('importRunBtn').addEventListener('click', async () => {
+  const fileInput = document.getElementById('importFileInput');
+  const file = fileInput.files[0];
+  if (!file) return;
+  const resultEl = document.getElementById('importResult');
+  const btn = document.getElementById('importRunBtn');
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+  resultEl.className = 'import-result';
+  resultEl.textContent = '';
+
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const res = await fetch('/api/captions/import', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (res.ok) {
+      resultEl.className = 'import-result ok';
+      resultEl.textContent = `Import complete — ${data.added} added, ${data.updated} updated, ${data.archived} archived.`;
+      await loadCaptions();
+    } else {
+      resultEl.className = 'import-result err';
+      resultEl.textContent = data.error || 'Import failed';
+    }
+  } catch (err) {
+    resultEl.className = 'import-result err';
+    resultEl.textContent = 'Network error during import';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Import & update';
+});
+
+// ── Filters ──────────────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', renderTable);
+document.getElementById('catFilter').addEventListener('change', renderTable);
+document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+loadCaptions();
+</script>
+</body>
+</html>

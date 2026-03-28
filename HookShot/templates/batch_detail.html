@@ -9,28 +9,128 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
-header { padding: 16px 32px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; }
+header { padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; flex-shrink: 0; }
 header a:hover { color: #38bdf8; background: #f0f9ff; }
-header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 18px; }
-header .logo svg { width: 24px; height: 24px; }
-header .spacer { flex: 1; }
-header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
-.container { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
-.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 24px; margin-bottom: 24px; }
-.card-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 17px; flex-shrink: 0; }
+header .logo svg { width: 22px; height: 22px; }
+header .spacer { flex: 1; min-width: 12px; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shrink: 0; }
+
+.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 20px; margin-bottom: 20px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
 .card-sub { font-size: 13px; color: #999; margin-bottom: 16px; }
-.items { display: flex; flex-direction: column; gap: 8px; }
-.item { display: grid; grid-template-columns: 1fr 70px 110px 70px 60px 75px; gap: 12px; align-items: center; padding: 12px 14px; background: #fafafa; border-radius: 10px; font-size: 13px; }
-.item .caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.item .posted { font-size: 12px; color: #666; }
-.item input[type=number] { width: 70px; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 6px; font-size: 13px; }
-.btn { padding: 6px 12px; border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: #38bdf8; color: #fff; text-decoration: none; display: inline-block; }
+
+/* top bar */
+.top-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.top-bar h2 { font-size: 17px; font-weight: 600; }
+.top-bar .sub { font-size: 13px; color: #999; }
+.btn { padding: 9px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; background: #38bdf8; color: #fff; text-decoration: none; display: inline-block; touch-action: manipulation; transition: background 0.15s; }
 .btn:hover { background: #7dd3fc; }
-.btn-sm { padding: 4px 8px; font-size: 11px; }
-.btn-outline { background: #fff; border: 1px solid #e0e0e0; color: #666; }
+.btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+.btn-outline { background: #fff; border: 1px solid #e0e0e0; color: #555; }
 .btn-outline:hover { background: #f5f5f5; }
-.dl-all { margin-bottom: 16px; }
+.btn-green { background: #22c55e; }
+.btn-green:hover { background: #16a34a; }
+
+/* layout: grid or video cards */
+.batch-layout { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
+
+/* item list */
+.items { display: flex; flex-direction: column; gap: 6px; }
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-radius: 10px;
+  font-size: 13px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.item:hover { background: #f0f9ff; border-color: #bae6fd; }
+.item.active { background: #f0f9ff; border-color: #38bdf8; }
+.item.approved { border-color: #22c55e; background: #f0fdf4; }
+.item.rejected { opacity: 0.5; }
+.item .num { font-size: 11px; color: #bbb; font-weight: 600; width: 20px; }
+.item .caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #444; }
+.item .video-id { font-size: 11px; color: #bbb; white-space: nowrap; }
+.item .posted-badge { font-size: 11px; color: #22c55e; white-space: nowrap; }
+.item .status-icon { font-size: 14px; width: 20px; text-align: center; }
+
+/* preview panel */
+.preview-panel { position: sticky; top: 24px; }
+.preview-frame {
+  background: #0a0a0a;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 9/16;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.preview-frame video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.preview-placeholder { text-align: center; color: #555; font-size: 12px; padding: 20px; }
+.preview-placeholder svg { width: 32px; height: 32px; color: #333; display: block; margin: 0 auto 8px; }
+.preview-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; color: #888; font-size: 13px; z-index: 2; gap: 12px; }
+.preview-loading.hidden { display: none; }
+.preview-loading::before { content: ''; width: 32px; height: 32px; border: 3px solid #333; border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.preview-loading span { color: #888; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.preview-caption { font-size: 12px; color: #666; line-height: 1.4; margin-bottom: 12px; min-height: 32px; }
+
+.preview-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+.btn-approve { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; background: #dcfce7; color: #15803d; transition: all 0.15s; touch-action: manipulation; }
+.btn-approve:hover, .btn-approve.active { background: #22c55e; color: #fff; }
+.btn-reject { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; background: #f4f4f4; color: #999; transition: all 0.15s; touch-action: manipulation; }
+.btn-reject:hover, .btn-reject.active { background: #fee2e2; color: #dc2626; }
+
+.preview-meta { font-size: 11px; color: #bbb; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+
+.dl-row { display: flex; gap: 8px; }
+
+/* approve summary bar */
+.approve-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.approve-bar .summary { font-size: 13px; color: #888; }
+
+/* Telegram */
+.tg-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 16px; background: #f0f9ff; border: 1px solid #bae6fd; flex-wrap: wrap; }
+.tg-bar.connected { background: #f0fdf4; border-color: #bbf7d0; }
+.tg-bar .tg-label { flex: 1; color: #555; }
+.tg-bar .tg-label strong { color: #333; }
+.btn-tg { padding: 6px 14px; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; touch-action: manipulation; white-space: nowrap; }
+.btn-tg-connect { background: #0088cc; color: #fff; }
+.btn-tg-connect:hover { background: #0077b5; }
+.btn-tg-disconnect { background: #f0f0f0; color: #999; }
+.btn-tg-disconnect:hover { background: #e0e0e0; }
+.btn-send-tg { padding: 9px 16px; border: none; border-radius: 8px; background: #0088cc; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; transition: all 0.15s; font-family: 'Inter', sans-serif; white-space: nowrap; touch-action: manipulation; }
+.btn-send-tg:hover { background: #0077b5; }
+.btn-send-tg:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+.tg-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.tg-modal { background: #fff; border-radius: 20px; padding: 28px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.tg-modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.tg-modal p { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.5; }
+.tg-code-box { background: #f4f4f4; border-radius: 10px; padding: 14px; text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 4px; color: #1a1a1a; margin-bottom: 16px; }
+.tg-modal .tg-steps { font-size: 12px; color: #888; line-height: 1.8; margin-bottom: 20px; }
+.tg-modal .tg-steps span { display: block; }
+.btn-tg-open { display: block; width: 100%; padding: 12px; border: none; border-radius: 10px; background: #0088cc; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; text-align: center; text-decoration: none; margin-bottom: 10px; touch-action: manipulation; }
+.btn-tg-open:hover { background: #0077b5; }
+.btn-tg-cancel { display: block; width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; color: #999; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; touch-action: manipulation; }
+.tg-waiting { font-size: 12px; color: #bbb; text-align: center; margin-top: 12px; }
+
+@media (max-width: 700px) {
+  .batch-layout { grid-template-columns: 1fr; }
+  .preview-panel { position: static; }
+  .item { grid-template-columns: auto 1fr auto; }
+  .item .video-id, .item .status-icon { display: none; }
+}
 </style>
 </head>
 <body>
@@ -38,6 +138,8 @@ header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
   <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
   <a href="/">Dashboard</a>
   <a href="/library">Video Library</a>
+  <a href="/captions">Captions</a>
+  <a href="/models">Models</a>
   <a href="/batches">Batches</a>
   <a href="/report">Report</a>
   <span class="spacer"></span>
@@ -45,51 +147,366 @@ header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
 </header>
 <div class="container">
   <div class="card">
-    <div class="card-title" id="batchTitle">Batch</div>
-    <div class="card-sub" id="batchSub"></div>
-    <div class="dl-all"><a href="#" id="downloadAll" class="btn btn-outline">Download all (.zip)</a></div>
-    <div class="items" id="items"></div>
+    <div class="top-bar">
+      <div>
+        <div class="card-title" id="batchTitle">Batch</div>
+        <div class="card-sub" id="batchSub"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-send-tg" id="sendTgBtn" style="display:none" disabled>Send to Telegram</button>
+        <button class="btn btn-green" id="downloadApprovedBtn" disabled>Download approved</button>
+      </div>
+    </div>
+
+    <div class="tg-bar" id="tgBar" style="display:none">
+      <span>✈️</span>
+      <span class="tg-label" id="tgLabel">Connect Telegram to send approved videos to your phone</span>
+      <button class="btn-tg btn-tg-connect" id="tgConnectBtn">Connect Telegram</button>
+    </div>
+
+    <!-- Telegram modal -->
+    <div class="tg-modal-overlay" id="tgModal" style="display:none">
+      <div class="tg-modal">
+        <h3>Connect Telegram</h3>
+        <p>Open the HookShot bot in Telegram and send the code below to link your account.</p>
+        <div class="tg-code-box" id="tgCode">——</div>
+        <div class="tg-steps">
+          <span>1. Click the button below to open the bot</span>
+          <span>2. Press <strong>Start</strong> in Telegram</span>
+          <span>3. The code is sent automatically</span>
+        </div>
+        <a class="btn-tg-open" id="tgBotLink" href="#" target="_blank" rel="noopener">Open HookShot Bot →</a>
+        <button class="btn-tg-cancel" id="tgCancelBtn">Cancel</button>
+        <div class="tg-waiting" id="tgWaiting">Waiting for connection…</div>
+      </div>
+    </div>
+
+    <div class="approve-bar">
+      <span class="summary" id="approveSummary">Select items to approve or reject</span>
+    </div>
+
+    <div class="batch-layout">
+      <div class="items" id="items"></div>
+
+      <div class="preview-panel">
+        <div class="preview-frame" id="previewFrame">
+          <div class="preview-placeholder" id="previewPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+            Click an item to preview
+          </div>
+          <div class="preview-loading hidden" id="previewLoading"><span>Loading…</span></div>
+          <video id="previewVideo" loop playsinline preload="auto" style="display:none"></video>
+        </div>
+        <div class="preview-caption" id="previewCaption"></div>
+        <div class="preview-actions" id="previewActions" style="display:none">
+          <button class="btn-approve" id="approveBtn">✓ Approve</button>
+          <button class="btn-reject" id="rejectBtn">✗ Reject</button>
+        </div>
+        <div class="preview-meta" id="previewMeta"></div>
+        <div class="dl-row" id="dlRow" style="display:none">
+          <a href="#" id="dlSingle" class="btn btn-outline" style="flex:1;text-align:center;font-size:12px">Download this video</a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
 <script>
 const batchId = '{{ batch_id }}';
+const STORAGE_KEY = 'approvals_' + batchId;
 const itemsEl = document.getElementById('items');
 const batchTitle = document.getElementById('batchTitle');
 const batchSub = document.getElementById('batchSub');
-const downloadAll = document.getElementById('downloadAll');
-downloadAll.href = '/download-all/' + batchId;
+const downloadApprovedBtn = document.getElementById('downloadApprovedBtn');
+const approveSummary = document.getElementById('approveSummary');
+const previewFrame = document.getElementById('previewFrame');
+const previewPlaceholder = document.getElementById('previewPlaceholder');
+const previewLoading = document.getElementById('previewLoading');
+const previewVideo = document.getElementById('previewVideo');
+const previewCaption = document.getElementById('previewCaption');
+const previewActions = document.getElementById('previewActions');
+const previewMeta = document.getElementById('previewMeta');
+const approveBtn = document.getElementById('approveBtn');
+const rejectBtn = document.getElementById('rejectBtn');
+const dlRow = document.getElementById('dlRow');
+const dlSingle = document.getElementById('dlSingle');
+
+let batchItems = [];
+let approvedSet = new Set();
+let rejectedSet = new Set();
+let activeItemId = null;
+
+// ── Approval persistence ───────────────────────────────────────────────────
+function saveApprovals() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      approved: [...approvedSet],
+      rejected: [...rejectedSet]
+    }));
+  } catch(e) {}
+}
+
+function loadApprovals() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const d = JSON.parse(saved);
+      approvedSet = new Set(d.approved || []);
+      rejectedSet = new Set(d.rejected || []);
+    }
+  } catch(e) {}
+}
+
+function updateApprovalUI() {
+  const total = batchItems.length;
+  const approved = approvedSet.size;
+  const rejected = rejectedSet.size;
+  const pending = total - approved - rejected;
+  approveSummary.textContent = `${approved} approved · ${rejected} rejected · ${pending} pending`;
+  downloadApprovedBtn.disabled = approved === 0;
+  if (tgConnected) sendTgBtn.disabled = approved === 0;
+}
+
+function setActiveItem(it) {
+  activeItemId = it.id;
+  document.querySelectorAll('.item').forEach(el => el.classList.remove('active'));
+  const row = document.querySelector(`.item[data-id="${it.id}"]`);
+  if (row) row.classList.add('active');
+
+  previewPlaceholder.style.display = 'none';
+  previewVideo.style.display = 'block';
+  previewVideo.src = '';
+  if (it.output_filename) {
+    previewLoading.classList.remove('hidden');
+    previewVideo.src = `/preview/${batchId}/${it.output_filename}`;
+    previewVideo.play().catch(() => {});
+  } else {
+    previewLoading.classList.add('hidden');
+  }
+
+  previewCaption.textContent = it.caption_preview || '';
+  previewActions.style.display = 'flex';
+  dlRow.style.display = 'flex';
+
+  approveBtn.classList.toggle('active', approvedSet.has(it.id));
+  rejectBtn.classList.toggle('active', rejectedSet.has(it.id));
+
+  previewMeta.innerHTML = `<span>Video: ${it.video_id}</span><span>Caption: ${it.caption_id}</span>`;
+
+  if (it.output_filename) {
+    dlSingle.href = `/download/${batchId}/${it.output_filename}`;
+    dlSingle.style.opacity = '1';
+    dlSingle.style.pointerEvents = 'auto';
+  } else {
+    dlSingle.href = '#';
+    dlSingle.style.opacity = '0.4';
+    dlSingle.style.pointerEvents = 'none';
+  }
+}
+
+previewVideo.addEventListener('canplay', () => previewLoading.classList.add('hidden'));
+previewVideo.addEventListener('canplaythrough', () => previewLoading.classList.add('hidden'));
+previewVideo.addEventListener('error', () => previewLoading.classList.add('hidden'));
+
+approveBtn.addEventListener('click', () => {
+  if (!activeItemId) return;
+  approvedSet.add(activeItemId);
+  rejectedSet.delete(activeItemId);
+  approveBtn.classList.add('active');
+  rejectBtn.classList.remove('active');
+  const row = document.querySelector(`.item[data-id="${activeItemId}"]`);
+  if (row) { row.classList.add('approved'); row.classList.remove('rejected'); }
+  const statusIcon = row && row.querySelector('.status-icon');
+  if (statusIcon) statusIcon.textContent = '✓';
+  saveApprovals();
+  updateApprovalUI();
+});
+
+rejectBtn.addEventListener('click', () => {
+  if (!activeItemId) return;
+  rejectedSet.add(activeItemId);
+  approvedSet.delete(activeItemId);
+  rejectBtn.classList.add('active');
+  approveBtn.classList.remove('active');
+  const row = document.querySelector(`.item[data-id="${activeItemId}"]`);
+  if (row) { row.classList.add('rejected'); row.classList.remove('approved'); }
+  const statusIcon = row && row.querySelector('.status-icon');
+  if (statusIcon) statusIcon.textContent = '✗';
+  saveApprovals();
+  updateApprovalUI();
+});
+
+// Individual file downloads (no zip)
+downloadApprovedBtn.addEventListener('click', async () => {
+  if (approvedSet.size === 0) return;
+  const approvedFiles = batchItems.filter(it => approvedSet.has(it.id) && it.output_filename);
+  downloadApprovedBtn.disabled = true;
+  downloadApprovedBtn.textContent = `Downloading ${approvedFiles.length}…`;
+  for (const it of approvedFiles) {
+    const a = document.createElement('a');
+    a.href = `/download/${batchId}/${it.output_filename}`;
+    a.download = it.output_filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    await new Promise(r => setTimeout(r, 600));
+  }
+  downloadApprovedBtn.disabled = false;
+  downloadApprovedBtn.textContent = 'Download approved';
+});
+
+// ── Telegram ──────────────────────────────────────────────────────────────
+const tgBar = document.getElementById('tgBar');
+const tgLabel = document.getElementById('tgLabel');
+const tgConnectBtn = document.getElementById('tgConnectBtn');
+const tgModal = document.getElementById('tgModal');
+const tgCode = document.getElementById('tgCode');
+const tgBotLink = document.getElementById('tgBotLink');
+const tgCancelBtn = document.getElementById('tgCancelBtn');
+const sendTgBtn = document.getElementById('sendTgBtn');
+let tgConnected = false;
+let tgPollInterval = null;
+
+async function refreshTgStatus() {
+  try {
+    const res = await fetch('/api/telegram/status');
+    const data = await res.json();
+    tgConnected = data.connected;
+    tgBar.style.display = 'flex';
+    if (tgConnected) {
+      tgBar.className = 'tg-bar connected';
+      tgLabel.innerHTML = '<strong>Telegram connected</strong> — approved videos will be sent to your Telegram';
+      tgConnectBtn.textContent = 'Disconnect';
+      tgConnectBtn.className = 'btn-tg btn-tg-disconnect';
+      sendTgBtn.style.display = '';
+      sendTgBtn.disabled = approvedSet.size === 0;
+    } else {
+      tgBar.className = 'tg-bar';
+      tgLabel.textContent = 'Connect Telegram to send approved videos directly to your phone';
+      tgConnectBtn.textContent = 'Connect Telegram';
+      tgConnectBtn.className = 'btn-tg btn-tg-connect';
+      sendTgBtn.style.display = 'none';
+    }
+  } catch (e) {}
+}
+
+tgConnectBtn.addEventListener('click', async () => {
+  if (tgConnected) {
+    await fetch('/api/telegram/disconnect', { method: 'POST' });
+    refreshTgStatus();
+    return;
+  }
+  const res = await fetch('/api/telegram/connect');
+  const data = await res.json();
+  tgCode.textContent = data.code;
+  if (data.bot_username) {
+    tgBotLink.href = `https://t.me/${data.bot_username}?start=${data.code}`;
+  } else {
+    tgBotLink.textContent = '(Bot not configured yet)';
+    tgBotLink.href = '#';
+  }
+  tgModal.style.display = 'flex';
+  tgPollInterval = setInterval(async () => {
+    const r = await fetch('/api/telegram/status');
+    const d = await r.json();
+    if (d.connected) {
+      clearInterval(tgPollInterval);
+      tgModal.style.display = 'none';
+      refreshTgStatus();
+    }
+  }, 2000);
+});
+
+tgCancelBtn.addEventListener('click', () => {
+  clearInterval(tgPollInterval);
+  tgModal.style.display = 'none';
+});
+
+sendTgBtn.addEventListener('click', async () => {
+  if (approvedSet.size === 0) return;
+  const approvedFilenames = batchItems
+    .filter(it => approvedSet.has(it.id) && it.output_filename)
+    .map(it => it.output_filename);
+  sendTgBtn.disabled = true;
+  sendTgBtn.textContent = 'Sending…';
+  try {
+    const res = await fetch('/api/telegram/send-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ batch_id: batchId, files: approvedFilenames }),
+    });
+    const data = await res.json().catch(() => ({ error: 'Server error' }));
+    if (res.ok) {
+      if (data.status === 'sending') {
+        sendTgBtn.textContent = 'Sending in background — check Telegram';
+        setTimeout(() => { sendTgBtn.textContent = 'Send to Telegram'; sendTgBtn.disabled = false; }, 3000);
+      } else if (data.sent > 0) {
+        const total = (data.sent || 0) + (data.failed || 0);
+        sendTgBtn.textContent = data.failed > 0
+          ? `Sent ${data.sent} of ${total} (${data.failed} failed)`
+          : `Sent ${data.sent}!`;
+        setTimeout(() => { sendTgBtn.textContent = 'Send to Telegram'; sendTgBtn.disabled = false; }, 4000);
+      } else {
+        sendTgBtn.textContent = data.error ? (data.error.slice(0, 50) + (data.error.length > 50 ? '…' : '')) : 'Failed — retry';
+        sendTgBtn.disabled = false;
+      }
+    } else if (data.error === 'not_connected') {
+      sendTgBtn.textContent = 'Not connected';
+      sendTgBtn.disabled = false;
+      refreshTgStatus();
+    } else {
+      sendTgBtn.textContent = data.error || 'Failed — retry';
+      sendTgBtn.disabled = false;
+    }
+  } catch (e) {
+    sendTgBtn.textContent = 'Failed — retry';
+    sendTgBtn.disabled = false;
+  }
+});
+
+refreshTgStatus();
+
+loadApprovals();
 
 fetch('/api/batches/' + batchId).then(r => r.json()).then(data => {
   if (data.error) { batchTitle.textContent = 'Not found'; return; }
-  batchTitle.textContent = (data.account_name || '') + (data.week_of ? ' · ' + data.week_of : '');
-  batchSub.textContent = 'Created: ' + (data.created_at || '');
-  itemsEl.innerHTML = data.items.map(it => {
-    const posted = it.posted_at ? '<span class="posted">Posted</span>' : '<button type="button" class="btn btn-sm mark-posted" data-id="' + it.id + '">Mark posted</button>';
-    const viewsVal = it.views_48h != null ? it.views_48h : '';
-    const dl = it.output_filename ? '<a href="/download/' + batchId + '/' + it.output_filename + '" class="btn btn-sm btn-outline">Download</a>' : '<span class="meta">—</span>';
-    return '<div class="item" data-item-id="' + it.id + '"><span class="caption" title="' + (it.caption_preview || '').replace(/"/g, '&quot;') + '">' + (it.caption_preview || '') + '</span><span>' + it.video_id + '</span>' + posted + '<input type="number" class="views-input" placeholder="Views" value="' + viewsVal + '" min="0"><button type="button" class="btn btn-sm save-views">Save</button>' + dl + '</div>';
+  batchTitle.textContent = data.week_of || data.account_name || 'Batch';
+  batchSub.textContent = 'Created: ' + (data.created_at || '').slice(0, 16).replace('T', ' ');
+  batchItems = data.items;
+  updateApprovalUI();
+
+  itemsEl.innerHTML = data.items.map((it, idx) => {
+    return `<div class="item" data-id="${it.id}" data-idx="${idx}">
+      <span class="num">${idx + 1}</span>
+      <span class="caption" title="${(it.caption_preview || '').replace(/"/g, '&quot;')}">${it.caption_preview || '—'}</span>
+      <span class="video-id">${it.video_id}</span>
+      <span class="posted-badge"></span>
+      <span class="status-icon"></span>
+    </div>`;
   }).join('');
-  itemsEl.querySelectorAll('.mark-posted').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
-      const res = await fetch('/api/batches/' + batchId + '/items/' + id + '/mark-posted', { method: 'POST' });
-      if (res.ok) { btn.replaceWith('<span class="posted">Posted</span>'); }
+
+  // Restore saved approval state visually
+  batchItems.forEach(it => {
+    const row = document.querySelector(`.item[data-id="${it.id}"]`);
+    if (!row) return;
+    const icon = row.querySelector('.status-icon');
+    if (approvedSet.has(it.id)) {
+      row.classList.add('approved');
+      if (icon) icon.textContent = '✓';
+    } else if (rejectedSet.has(it.id)) {
+      row.classList.add('rejected');
+      if (icon) icon.textContent = '✗';
+    }
+  });
+
+  itemsEl.querySelectorAll('.item').forEach(row => {
+    row.addEventListener('click', () => {
+      const it = batchItems.find(x => x.id === parseInt(row.dataset.id));
+      if (it) setActiveItem(it);
     });
   });
-  itemsEl.querySelectorAll('.save-views').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const row = btn.closest('.item');
-      const id = row.dataset.itemId;
-      const input = row.querySelector('.views-input');
-      const views = input.value.trim() ? parseInt(input.value, 10) : null;
-      const res = await fetch('/api/batches/' + batchId + '/items/' + id + '/views', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ views_48h: views })
-      });
-      if (res.ok) { btn.textContent = 'Saved'; setTimeout(() => { btn.textContent = 'Save'; }, 1500); }
-    });
-  });
+
+  if (data.items.length) setActiveItem(data.items[0]);
 }).catch(() => { batchTitle.textContent = 'Error loading batch'; });
 </script>
 </body>

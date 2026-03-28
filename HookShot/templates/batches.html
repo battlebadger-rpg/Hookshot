@@ -9,18 +9,18 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
-header { padding: 16px 32px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; }
+header { padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; flex-shrink: 0; }
 header a:hover { color: #38bdf8; background: #f0f9ff; }
-header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 18px; }
-header .logo svg { width: 24px; height: 24px; }
-header .spacer { flex: 1; }
-header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
-.container { max-width: 800px; margin: 32px auto; padding: 0 24px; }
-.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 24px; margin-bottom: 24px; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 17px; flex-shrink: 0; }
+header .logo svg { width: 22px; height: 22px; }
+header .spacer { flex: 1; min-width: 12px; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shrink: 0; }
+.container { max-width: 800px; margin: 24px auto; padding: 0 16px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 20px; margin-bottom: 20px; }
 .card-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
 .list { display: flex; flex-direction: column; gap: 8px; }
-.batch-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #fafafa; border-radius: 10px; font-size: 14px; }
+.batch-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #fafafa; border-radius: 10px; font-size: 14px; gap: 12px; flex-wrap: wrap; }
 .batch-row a { color: #38bdf8; text-decoration: none; font-weight: 500; }
 .batch-row a:hover { text-decoration: underline; }
 .meta { color: #999; font-size: 13px; }
@@ -31,6 +31,8 @@ header .signout { font-size: 12px; color: #999; border: 1px solid #eee; }
   <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
   <a href="/">Dashboard</a>
   <a href="/library">Video Library</a>
+  <a href="/captions">Captions</a>
+  <a href="/models">Models</a>
   <a href="/batches">Batches</a>
   <a href="/report">Report</a>
   <span class="spacer"></span>
@@ -51,8 +53,8 @@ fetch('/api/batches').then(r => r.json()).then(data => {
     return;
   }
   list.innerHTML = data.batches.map(b => {
-    const week = b.week_of ? ' · ' + b.week_of : '';
-    return '<div class="batch-row"><a href="/batch/' + b.id + '">' + b.account_name + week + '</a><span class="meta">' + (b.created_at || '').slice(0, 19) + '</span></div>';
+    const label = b.week_of || b.account_name || 'Batch';
+    return '<div class="batch-row"><a href="/batch/' + b.id + '">' + label + '</a><span class="meta">' + (b.created_at || '').slice(0, 16).replace('T', ' ') + '</span></div>';
   }).join('');
 });
 </script>
