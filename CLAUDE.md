@@ -2,6 +2,23 @@
 
 ---
 
+## Ask Before Acting — Most Important Rule
+
+Always ask the user for confirmation before making any change that was not explicitly requested in the current message.
+
+This includes:
+- "Fixing" something that looks wrong but wasn't mentioned
+- Refactoring or tidying code
+- Updating dependencies, versions, or configurations
+- Changing how something works even if you think the current way is incorrect
+- Any change beyond the exact scope of what was asked
+
+The correct behaviour is: complete only what was asked, then separately note anything else you noticed and ask if the user wants it addressed. Do not make the change first and report it after.
+
+When in doubt about whether a change is in scope — stop and ask.
+
+---
+
 ## Deployment Rules — READ BEFORE TOUCHING ANYTHING
 
 **NEVER deploy directly to the VPS via SSH, SCP, SFTP, or any direct connection.**
@@ -30,6 +47,18 @@ If you see a model name you don't recognise (e.g. gemini-3-flash-preview, gemini
 Same applies to library function signatures — if a function call looks unfamiliar, ask the user before changing it.
 
 If a model or library call is returning an error, ask the user what the correct current version is. Do not guess.
+
+---
+
+## Correct Gemini Model Names — DO NOT CHANGE THESE
+
+These are the correct, current model names used across these tools. They may look unfamiliar — that is fine. Do NOT replace them with older model names you think are correct:
+
+- `gemini-3-pro-image-preview` — used for image generation
+- `gemini-3.1-flash-lite-preview` — used for text tasks such as watching videos, transcribing, and generating captions for reels
+- `gemini-3-flash-preview` — used for general caption generation in HookShot
+
+If any of these model names appear in code and are producing errors, report the error to the user and ask what to do. Never silently swap them for a different model name.
 
 ---
 
