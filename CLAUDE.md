@@ -17,6 +17,8 @@ The correct behaviour is: complete only what was asked, then separately note any
 
 When in doubt about whether a change is in scope — stop and ask.
 
+When you do need to ask the user something, ask a single direct question — not a multiple choice list of options. The user prefers a clear specific question they can answer with a yes, no, or a brief instruction. Do not present numbered or bulleted lists of options to choose from.
+
 ---
 
 ## Deployment Rules — READ BEFORE TOUCHING ANYTHING
