@@ -56,9 +56,9 @@ If a model or library call is returning an error, ask the user what the correct 
 
 These are the correct, current model names used across these tools. They may look unfamiliar — that is fine. Do NOT replace them with older model names you think are correct:
 
-- `gemini-3-pro-image-preview` — used for image generation
-- `gemini-3.1-flash-lite-preview` — used for text tasks such as watching videos, transcribing, and generating captions for reels
-- `gemini-3-flash-preview` — used for general caption generation in HookShot
+- `gemini-3-pro-image-preview` — used for IMAGE GENERATION ONLY (creating/generating images). Do NOT use this for description, analysis, transcription, or any other task.
+- `gemini-3-flash-preview` — used for image description, video description, video transcription, caption generation, and all other text-based AI tasks. If you are sending an image or video to Gemini to be described, analysed, or transcribed, use this model.
+- `gemini-3.1-flash-lite-preview` — used for lightweight text tasks such as watching videos, transcribing, and generating captions for reels
 
 If any of these model names appear in code and are producing errors, report the error to the user and ask what to do. Never silently swap them for a different model name.
 
