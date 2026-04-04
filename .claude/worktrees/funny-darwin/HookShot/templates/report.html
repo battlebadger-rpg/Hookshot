@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot — Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
+header { padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; flex-shrink: 0; }
+header a:hover { color: #38bdf8; background: #f0f9ff; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 17px; flex-shrink: 0; }
+header .logo svg { width: 22px; height: 22px; }
+header .spacer { flex: 1; min-width: 12px; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shrink: 0; }
+.container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 20px; margin-bottom: 20px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 400px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { font-weight: 600; color: #666; }
+.meta { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
+  <a href="/">Dashboard</a>
+  <a href="/library">Video Library</a>
+  <a href="/captions">Captions</a>
+  <a href="/models">Models</a>
+  <a href="/batches">Batches</a>
+  <a href="/report">Report</a>
+  <span class="spacer"></span>
+  <a href="/logout" class="signout">Sign out</a>
+</header>
+<div class="container">
+  <div class="card">
+    <div class="card-title">Top captions (by total views)</div>
+    <div class="meta" style="margin-bottom:12px">From all batch items with logged views.</div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Category</th><th>Caption</th><th>Times used</th><th>Total views</th></tr></thead><tbody id="topCaptions"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Best video + caption combos</div>
+    <div class="table-wrap"><table><thead><tr><th>Video</th><th>Caption ID</th><th>Total views</th></tr></thead><tbody id="topCombos"></tbody></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Average views by category</div>
+    <div class="table-wrap"><table><thead><tr><th>Category</th><th>Avg views</th><th>Count</th></tr></thead><tbody id="byCategory"></tbody></table></div>
+  </div>
+</div>
+<script>
+fetch('/api/report/summary').then(r => r.json()).then(data => {
+  const cap = document.getElementById('topCaptions');
+  cap.innerHTML = (data.top_captions || []).slice(0, 20).map(c => '<tr><td>' + c.id + '</td><td>' + (c.category || '') + '</td><td>' + (c.caption || '') + '</td><td>' + c.times_used + '</td><td>' + (c.total_views != null ? c.total_views : '') + '</td></tr>').join('');
+  const combos = document.getElementById('topCombos');
+  combos.innerHTML = (data.top_combos || []).map(c => '<tr><td>' + c.video_id + '</td><td>' + c.caption_id + '</td><td>' + c.total_views + '</td></tr>').join('');
+  const cat = document.getElementById('byCategory');
+  cat.innerHTML = (data.by_category || []).map(c => '<tr><td>' + c.category + '</td><td>' + Math.round(c.avg_views || 0) + '</td><td>' + c.count + '</td></tr>').join('');
+});
+</script>
+</body>
+</html>

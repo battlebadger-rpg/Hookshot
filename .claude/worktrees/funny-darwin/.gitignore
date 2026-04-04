@@ -1,0 +1,15 @@
+.env
+create_repo.py
+__pycache__/
+*.pyc
+*.db
+uploads/
+outputs/
+library_videos/
+dist/
+build/
+*.zip
+HookShot/venv/
+HookShot/batch_output/
+HookShot/telegram_pending.json
+HookShot/telegram_users.json

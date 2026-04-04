@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #f8f8f8;
+  color: #1a1a1a;
+  min-height: 100vh;
+}
+
+header {
+  padding: 20px 40px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+header svg { width: 28px; height: 28px; color: #38bdf8; }
+
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #38bdf8;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e8e8e8;
+  padding: 28px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.left-col { display: flex; flex-direction: column; gap: 24px; }
+
+/* Text Hooks */
+.hooks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.hooks-header .meta {
+  font-size: 12px;
+  color: #bbb;
+  font-weight: 400;
+}
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  color: #333;
+}
+
+textarea:focus { border-color: #ccc; }
+
+textarea::placeholder { color: #ccc; }
+
+/* Position Hint */
+.position-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #bbb;
+  text-align: center;
+}
+
+/* Font Size Slider */
+.size-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.size-row label {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+}
+
+.size-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.size-control input[type=range] {
+  width: 120px;
+  accent-color: #38bdf8;
+}
+
+.size-control span {
+  font-size: 12px;
+  color: #666;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Upload */
+.upload-zone {
+  border: 2px dashed #e0e0e0;
+  border-radius: 14px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+}
+
+.upload-zone:hover {
+  border-color: #38bdf8;
+  background: #f0f9ff;
+}
+
+.upload-zone.has-file {
+  border-style: solid;
+  border-color: #e0e0e0;
+  padding: 12px;
+}
+
+.upload-zone svg {
+  width: 32px;
+  height: 32px;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.upload-zone p {
+  font-size: 13px;
+  color: #bbb;
+  font-weight: 400;
+}
+
+.upload-zone p strong {
+  color: #999;
+  font-weight: 500;
+}
+
+.upload-zone input { display: none; }
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.file-info .icon {
+  width: 40px;
+  height: 40px;
+  background: #f4f4f4;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-info .icon svg { width: 18px; height: 18px; color: #999; margin: 0; }
+.file-info .name { font-weight: 500; color: #333; }
+.file-info .size { font-size: 11px; color: #bbb; }
+.file-info .remove {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.file-info .remove:hover { color: #999; background: #f0f0f0; }
+
+/* Generate Button */
+.btn-generate {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #38bdf8;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.2px;
+}
+
+.btn-generate:hover { background: #7dd3fc; }
+.btn-generate:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+
+.generate-hint {
+  font-size: 11px;
+  color: #bbb;
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* Preview */
+.preview-card {
+  position: sticky;
+  top: 32px;
+}
+
+.preview-label {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: -0.2px;
+}
+
+.preview-frame {
+  width: 100%;
+  aspect-ratio: 9/16;
+  background: #0a0a0a;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.preview-placeholder {
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+}
+
+.preview-placeholder svg {
+  width: 40px;
+  height: 40px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.preview-overlay {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.72);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.preview-overlay.dragging { cursor: grabbing; }
+
+.preview-overlay span {
+  color: #fff;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  line-height: 1.3;
+}
+
+/* Results */
+.results {
+  margin-top: 24px;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.results-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-download-all {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-download-all:hover { background: #f8f8f8; color: #333; }
+
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.result-item .hook-text {
+  color: #555;
+  font-weight: 400;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+
+.result-item a {
+  color: #1a1a1a;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.result-item a:hover { background: #eee; }
+
+/* Progress */
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  margin-top: 16px;
+  overflow: hidden;
+  display: none;
+}
+
+.progress-bar.active { display: block; }
+
+.progress-fill {
+  height: 100%;
+  background: #38bdf8;
+  border-radius: 2px;
+  transition: width 0.3s;
+  width: 0%;
+}
+
+.status-text {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+  text-align: center;
+  display: none;
+}
+
+.status-text.active { display: block; }
+
+/* Hook Library */
+.library-count { font-size: 12px; color: #bbb; font-weight: 400; }
+.library-divider { border: none; border-top: 1px solid #f0f0f0; margin: 16px 0; }
+
+.generate-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.generate-row label { font-size: 13px; color: #999; font-weight: 500; white-space: nowrap; }
+.generate-row input[type=number] {
+  width: 60px;
+  padding: 8px 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  color: #333;
+  text-align: center;
+}
+
+.btn-gen-library {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #38bdf8;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-gen-library:hover { background: #7dd3fc; }
+.btn-gen-library:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+
+/* Recommendation box */
+.tip-box {
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #713f12;
+  line-height: 1.5;
+}
+.tip-box strong { font-weight: 600; }
+
+/* Section instruction text */
+.section-note {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.library-import-area {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  color: #333;
+}
+.library-import-area:focus { border-color: #ccc; }
+.library-import-area::placeholder { color: #ccc; }
+
+.library-actions { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+
+.btn-save-library {
+  padding: 9px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.btn-save-library:hover { background: #f4f4f4; color: #333; }
+
+.lib-feedback { font-size: 11px; color: #999; flex: 1; }
+.lib-feedback.success { color: #22c55e; }
+</style>
+</head>
+<body>
+
+<header>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+  </svg>
+  <h1>HookShot</h1>
+  <a href="/logout" style="margin-left:auto;font-size:12px;font-weight:500;color:#999;text-decoration:none;padding:6px 12px;border:1px solid #eee;border-radius:8px;transition:all 0.15s;" onmouseover="this.style.color='#333';this.style.borderColor='#ccc'" onmouseout="this.style.color='#999';this.style.borderColor='#eee'">Sign out</a>
+</header>
+
+<div class="container">
+  <div class="left-col">
+    <div class="card">
+      <div class="hooks-header">
+        <div>
+          <div class="card-title">Text Hooks</div>
+          <div class="card-sub">Type your hook text here &mdash; one line per video</div>
+        </div>
+        <span class="meta" id="hookCount">0 hooks</span>
+      </div>
+      <p class="section-note">Each line you type will become a separate output video with that text overlaid on screen. Add as many lines as videos you want to create.</p>
+      <textarea id="hooks" placeholder="Wait until you see this...&#10;This app changed my life&#10;POV: You just discovered..."></textarea>
+      <div class="position-hint">Drag the text bar in the preview to reposition it on your video</div>
+      <div class="size-row">
+        <label>Font Size</label>
+        <div class="size-control">
+          <input type="range" id="fontSize" min="1.5" max="5" value="3" step="0.1">
+          <span id="fontSizeVal">3%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hooks-header">
+        <div>
+          <div class="card-title">Hook Library</div>
+          <div class="card-sub">Your shared library of hooks &mdash; grows automatically as you use the tool</div>
+        </div>
+        <span class="library-count" id="libraryCount">0 saved</span>
+      </div>
+      <p class="section-note">Choose how many hooks to load, then click the button &mdash; random hooks will be pulled from the library and placed in the text box above, ready to generate.</p>
+      <div class="generate-row">
+        <label>Load</label>
+        <input type="number" id="genCount" value="5" min="1" max="200">
+        <button class="btn-gen-library" id="genFromLibraryBtn" disabled>Load hooks</button>
+        <span class="lib-feedback" id="genFeedback"></span>
+      </div>
+      <hr class="library-divider">
+      <div class="card-title" style="font-size:13px;margin-bottom:4px;">Import hooks</div>
+      <p class="section-note">Paste hooks from a spreadsheet or document &mdash; one per line. Duplicates are automatically ignored so you'll never get the same hook twice in the library.</p>
+      <textarea class="library-import-area" id="importHooks" placeholder="Paste hooks here, one per line...&#10;Duplicates are ignored automatically."></textarea>
+      <div class="library-actions">
+        <button class="btn-save-library" id="saveLibraryBtn">Save to Library</button>
+        <span class="lib-feedback" id="saveFeedback"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Upload Video</div>
+      <div class="card-sub">MP4, MOV, or WEBM &mdash; click or drag &amp; drop your video below</div>
+      <p class="section-note">Upload the video you want to add hook text to. Once uploaded, a preview will appear on the right where you can drag the text bar to set its position.</p>
+      <div class="upload-zone" id="uploadZone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p><strong>Click to upload</strong> or drag & drop</p>
+        <input type="file" id="fileInput" accept="video/*">
+      </div>
+      <div class="tip-box">
+        <strong>Recommendation:</strong> Use videos from Reels that have already gone viral in the past &mdash; they have a much higher chance of going viral again when combined with a strong hook using this tool.
+      </div>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" disabled>Generate Videos</button>
+    <p class="generate-hint">One output video will be created for each hook in the text box above</p>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="status-text" id="statusText"></div>
+
+    <div class="results" id="results" style="display:none">
+      <div class="results-header">
+        <h3>Generated Videos</h3>
+        <button class="btn-download-all" id="downloadAllBtn">Download All (.zip)</button>
+      </div>
+      <div class="result-list" id="resultList"></div>
+    </div>
+  </div>
+
+  <div class="preview-card card">
+    <div class="preview-label">Preview</div>
+    <p class="section-note" style="margin-bottom:12px;">Once your video is uploaded, a live preview appears here. Drag the black text bar up or down to set exactly where the hook text will appear on screen.</p>
+    <div class="preview-frame" id="previewFrame">
+      <div class="preview-placeholder" id="previewPlaceholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+          <line x1="7" y1="2" x2="7" y2="22"/>
+          <line x1="17" y1="2" x2="17" y2="22"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <line x1="2" y1="7" x2="7" y2="7"/>
+          <line x1="2" y1="17" x2="7" y2="17"/>
+          <line x1="17" y1="17" x2="22" y2="17"/>
+          <line x1="17" y1="7" x2="22" y2="7"/>
+        </svg>
+        <p>Upload a video to preview</p>
+      </div>
+      <video id="previewVideo" loop muted playsinline style="display:none"></video>
+    </div>
+  </div>
+</div>
+
+<script>
+const hooks = document.getElementById('hooks');
+const hookCount = document.getElementById('hookCount');
+const fontSize = document.getElementById('fontSize');
+const fontSizeVal = document.getElementById('fontSizeVal');
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const generateBtn = document.getElementById('generateBtn');
+const progressBar = document.getElementById('progressBar');
+const progressFill = document.getElementById('progressFill');
+const statusText = document.getElementById('statusText');
+const results = document.getElementById('results');
+const resultList = document.getElementById('resultList');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const previewFrame = document.getElementById('previewFrame');
+const previewPlaceholder = document.getElementById('previewPlaceholder');
+const previewVideo = document.getElementById('previewVideo');
+
+let videoData = null;
+let positionY = 0.5;
+
+function getVideoRect() {
+  if (!videoData) return null;
+  const fw = previewFrame.offsetWidth;
+  const fh = previewFrame.offsetHeight;
+  const vw = videoData.width;
+  const vh = videoData.height;
+  const scale = Math.min(fw / vw, fh / vh);
+  const rw = vw * scale;
+  const rh = vh * scale;
+  return { x: (fw - rw) / 2, y: (fh - rh) / 2, w: rw, h: rh };
+}
+
+hooks.addEventListener('input', () => {
+  const lines = hooks.value.split('\n').filter(l => l.trim());
+  hookCount.textContent = lines.length + ' hook' + (lines.length !== 1 ? 's' : '');
+  updatePreviewOverlay();
+  checkReady();
+});
+
+fontSize.addEventListener('input', () => {
+  fontSizeVal.textContent = fontSize.value + '%';
+  updatePreviewOverlay();
+});
+
+let dragging = false, dragStartY = 0, dragStartTop = 0;
+
+function startDrag(e) {
+  const overlay = document.getElementById('textOverlay');
+  if (!overlay) return;
+  dragging = true;
+  overlay.classList.add('dragging');
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  dragStartY = clientY;
+  dragStartTop = overlay.offsetTop;
+  e.preventDefault();
+}
+
+function onDrag(e) {
+  if (!dragging) return;
+  const overlay = document.getElementById('textOverlay');
+  if (!overlay) return;
+  const rect = getVideoRect();
+  if (!rect) return;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const dy = clientY - dragStartY;
+  const overlayH = overlay.offsetHeight;
+  const minTop = rect.y;
+  const maxTop = rect.y + rect.h - overlayH;
+  let newTop = Math.max(minTop, Math.min(maxTop, dragStartTop + dy));
+  overlay.style.top = newTop + 'px';
+  overlay.style.transform = 'none';
+  positionY = (newTop - rect.y + overlayH / 2) / rect.h;
+  e.preventDefault();
+}
+
+function endDrag() {
+  if (!dragging) return;
+  dragging = false;
+  const overlay = document.getElementById('textOverlay');
+  if (overlay) overlay.classList.remove('dragging');
+}
+
+document.addEventListener('mousemove', onDrag);
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchmove', onDrag, { passive: false });
+document.addEventListener('touchend', endDrag);
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = '#bbb'; });
+uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = ''; });
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.style.borderColor = '';
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+async function handleFile(file) {
+  const form = new FormData();
+  form.append('video', file);
+
+  uploadZone.classList.add('has-file');
+  uploadZone.innerHTML = `
+    <div class="file-info">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      <div>
+        <div class="name">${file.name}</div>
+        <div class="size">${(file.size / 1048576).toFixed(1)} MB</div>
+      </div>
+      <button class="remove" onclick="removeFile(event)">&times;</button>
+    </div>
+  `;
+
+  const res = await fetch('/upload', { method: 'POST', body: form });
+  const data = await res.json();
+  videoData = data;
+
+  previewPlaceholder.style.display = 'none';
+  previewVideo.style.display = 'block';
+  previewVideo.src = '/preview/' + data.id;
+  previewVideo.play();
+  updatePreviewOverlay();
+  checkReady();
+}
+
+function removeFile(e) {
+  e.stopPropagation();
+  videoData = null;
+  uploadZone.classList.remove('has-file');
+  uploadZone.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <p><strong>Click to upload</strong> or drag & drop</p>
+    <input type="file" id="fileInput" accept="video/*">
+  `;
+  document.getElementById('fileInput').addEventListener('change', function() {
+    if (this.files.length) handleFile(this.files[0]);
+  });
+  previewVideo.style.display = 'none';
+  previewVideo.src = '';
+  previewPlaceholder.style.display = '';
+  removeOverlay();
+  checkReady();
+}
+
+function updatePreviewOverlay() {
+  removeOverlay();
+  const firstHook = hooks.value.split('\n').find(l => l.trim());
+  if (!firstHook || !videoData) return;
+  const rect = getVideoRect();
+  if (!rect) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'preview-overlay';
+  overlay.id = 'textOverlay';
+
+  const pxSize = (parseFloat(fontSize.value) / 100) * rect.h;
+  const padV = Math.max(pxSize * 0.45, 2);
+
+  overlay.style.left = rect.x + 'px';
+  overlay.style.width = rect.w + 'px';
+  overlay.style.right = 'auto';
+  overlay.style.padding = padV + 'px 16px';
+  overlay.innerHTML = `<span style="font-size:${pxSize}px">${firstHook.trim()}</span>`;
+  previewFrame.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    const overlayH = overlay.offsetHeight;
+    let top = rect.y + positionY * rect.h - overlayH / 2;
+    top = Math.max(rect.y, Math.min(rect.y + rect.h - overlayH, top));
+    overlay.style.top = top + 'px';
+  });
+
+  overlay.addEventListener('mousedown', startDrag);
+  overlay.addEventListener('touchstart', startDrag, { passive: false });
+}
+
+function removeOverlay() {
+  const el = document.getElementById('textOverlay');
+  if (el) el.remove();
+}
+
+function checkReady() {
+  const hasHooks = hooks.value.split('\n').some(l => l.trim());
+  generateBtn.disabled = !(hasHooks && videoData);
+}
+
+generateBtn.addEventListener('click', async () => {
+  const hookLines = hooks.value.split('\n').filter(l => l.trim());
+  if (!hookLines.length || !videoData) return;
+
+  generateBtn.disabled = true;
+  generateBtn.textContent = 'Generating...';
+  progressBar.classList.add('active');
+  statusText.classList.add('active');
+  results.style.display = 'none';
+
+  let progress = 0;
+  const step = 100 / hookLines.length;
+  const interval = setInterval(() => {
+    if (progress < 90) {
+      progress += step * 0.3;
+      progressFill.style.width = Math.min(progress, 90) + '%';
+    }
+  }, 500);
+
+  statusText.textContent = `Processing ${hookLines.length} video${hookLines.length > 1 ? 's' : ''}...`;
+
+  const res = await fetch('/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: videoData.id,
+      ext: videoData.ext,
+      hooks: hookLines,
+      positionY,
+      fontSizePct: parseFloat(fontSize.value)
+    })
+  });
+
+  clearInterval(interval);
+  progressFill.style.width = '100%';
+
+  const data = await res.json();
+  statusText.textContent = `Done! ${data.files.length} videos generated.`;
+
+  resultList.innerHTML = '';
+  data.files.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `
+      <span class="hook-text">${hookLines[i]}</span>
+      <a href="/download/${data.batch}/${f}">Download</a>
+    `;
+    resultList.appendChild(div);
+  });
+
+  downloadAllBtn.onclick = () => {
+    window.location = '/download-all/' + data.batch;
+  };
+
+  results.style.display = 'block';
+  generateBtn.disabled = false;
+  generateBtn.textContent = 'Generate Videos';
+
+  // Refresh library count after auto-save
+  refreshLibraryCount();
+
+  setTimeout(() => {
+    progressBar.classList.remove('active');
+    statusText.classList.remove('active');
+    progressFill.style.width = '0%';
+  }, 2000);
+});
+
+// ── Hook Library ─────────────────────────────────────────────────────────────
+const libraryCount    = document.getElementById('libraryCount');
+const genCount        = document.getElementById('genCount');
+const genFromLibraryBtn = document.getElementById('genFromLibraryBtn');
+const genFeedback     = document.getElementById('genFeedback');
+const importHooks     = document.getElementById('importHooks');
+const saveLibraryBtn  = document.getElementById('saveLibraryBtn');
+const saveFeedback    = document.getElementById('saveFeedback');
+
+async function refreshLibraryCount() {
+  const res  = await fetch('/hooks/count');
+  const data = await res.json();
+  libraryCount.textContent = data.count + ' saved';
+  genFromLibraryBtn.disabled = data.count === 0;
+}
+
+saveLibraryBtn.addEventListener('click', async () => {
+  const lines = importHooks.value.split('\n').filter(l => l.trim());
+  if (!lines.length) return;
+  saveLibraryBtn.disabled = true;
+  const res  = await fetch('/hooks/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hooks: lines })
+  });
+  const data = await res.json();
+  importHooks.value = '';
+  libraryCount.textContent = data.total + ' saved';
+  genFromLibraryBtn.disabled = data.total === 0;
+  saveFeedback.textContent = `Saved ${data.added} new · ${data.skipped} duplicates skipped`;
+  saveFeedback.className = 'lib-feedback success';
+  saveLibraryBtn.disabled = false;
+  setTimeout(() => { saveFeedback.textContent = ''; saveFeedback.className = 'lib-feedback'; }, 4000);
+});
+
+genFromLibraryBtn.addEventListener('click', async () => {
+  const n   = parseInt(genCount.value) || 5;
+  const res = await fetch(`/hooks/random?n=${n}`);
+  const data = await res.json();
+  if (!data.hooks.length) return;
+  hooks.value = data.hooks.join('\n');
+  const c = data.hooks.length;
+  hookCount.textContent = c + ' hook' + (c !== 1 ? 's' : '');
+  genFeedback.textContent = `Loaded ${c} from library`;
+  genFeedback.className = 'lib-feedback success';
+  updatePreviewOverlay();
+  checkReady();
+  setTimeout(() => { genFeedback.textContent = ''; genFeedback.className = 'lib-feedback'; }, 3000);
+});
+
+refreshLibraryCount();
+</script>
+</body>
+</html>

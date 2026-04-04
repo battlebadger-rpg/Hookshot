@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookShot — Video Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f8f8f8; color: #1a1a1a; min-height: 100vh; }
+header { padding: 12px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+header a { color: #666; text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; flex-shrink: 0; }
+header a:hover { color: #38bdf8; background: #f0f9ff; }
+header .logo { display: flex; align-items: center; gap: 8px; color: #38bdf8; font-weight: 600; font-size: 17px; flex-shrink: 0; }
+header .logo svg { width: 22px; height: 22px; }
+header .spacer { flex: 1; min-width: 12px; }
+header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shrink: 0; }
+.container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e8e8; padding: 20px; margin-bottom: 20px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.card-sub { font-size: 13px; color: #999; margin-bottom: 16px; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { font-weight: 600; color: #666; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+.badge.yes { background: #dcfce7; color: #166534; }
+.badge.no { background: #fee2e2; color: #991b1b; }
+.upload-cell input[type=file] { font-size: 12px; }
+.btn { padding: 8px 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: #38bdf8; color: #fff; touch-action: manipulation; }
+.btn:hover { background: #7dd3fc; }
+.btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+.add-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-top: 16px; }
+.add-form input, .add-form label { font-size: 14px; }
+.add-form input[type=text] { padding: 10px 12px; border: 1px solid #e8e8e8; border-radius: 8px; min-width: 160px; width: 100%; max-width: 260px; }
+.feedback { font-size: 13px; margin-top: 12px; }
+.feedback.ok { color: #16a34a; }
+.feedback.err { color: #dc2626; }
+.upload-status { font-size: 12px; color: #999; margin-top: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>HookShot</a>
+  <a href="/">Dashboard</a>
+  <a href="/library">Video Library</a>
+  <a href="/captions">Captions</a>
+  <a href="/models">Models</a>
+  <a href="/batches">Batches</a>
+  <a href="/report">Report</a>
+  <span class="spacer"></span>
+  <a href="/logout" class="signout">Sign out</a>
+</header>
+<div class="container">
+  <div class="card">
+    <div class="card-title">Video Library</div>
+    <div class="card-sub">Videos are tagged to a model — batches only use videos belonging to the selected account's model.</div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <label style="font-size:13px;color:#666">Filter by model:</label>
+      <select id="modelFilter" style="min-width:160px">
+        <option value="">All models</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Model</th><th>Description</th><th>Duration</th><th>Times used</th><th>File</th><th>In rotation</th></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Add new video to library</div>
+    <div class="card-sub">Adds next ID (V11, V12…) and saves the file. <strong>Assign it to a model</strong> so it's only used for that model's batches.</div>
+    <form id="addForm" class="add-form">
+      <div><label style="display:block;font-size:12px;color:#888;margin-bottom:4px">Model</label><select name="model_id" id="addModelSelect" style="min-width:160px"><option value="">— Unassigned —</option></select></div>
+      <div><label style="display:block;font-size:12px;color:#888;margin-bottom:4px">Description</label><input type="text" name="description" placeholder="e.g. Beach wall, green dress, 8s" required></div>
+      <div><label style="display:block;font-size:12px;color:#888;margin-bottom:4px">Duration</label><input type="text" name="duration" placeholder="e.g. 8s"></div>
+      <div><label style="display:block;font-size:12px;color:#888;margin-bottom:4px">File</label><input type="file" name="file" accept="video/*,.mov,.mp4" required></div>
+      <button type="submit" class="btn">Add video</button>
+    </form>
+    <div class="feedback" id="addFeedback"></div>
+  </div>
+</div>
+<script>
+const tbody = document.getElementById('tableBody');
+const addForm = document.getElementById('addForm');
+const addFeedback = document.getElementById('addFeedback');
+const modelFilter = document.getElementById('modelFilter');
+const addModelSelect = document.getElementById('addModelSelect');
+
+let allVideos = [];
+
+function render(videos) {
+  tbody.innerHTML = videos.map(v => {
+    const hasFile = v.has_file ? '<span class="badge yes">Yes</span>' : '<span class="badge no">No</span>';
+    const modelLabel = v.model_name || '<span style="color:#bbb">Unassigned</span>';
+    const isActive = v.active !== false;
+    const toggleBtn = `<button type="button" class="btn btn-sm toggle-active-btn" 
+      data-video-id="${v.id}" data-active="${isActive ? '1' : '0'}"
+      style="background:${isActive ? '#22c55e' : '#e5e7eb'};color:${isActive ? '#fff' : '#6b7280'};min-width:70px">
+      ${isActive ? 'Active' : 'Paused'}
+    </button>`;
+    return `<tr><td>${v.id}</td><td>${modelLabel}</td><td>${v.description || ''}</td><td>${v.duration || ''}</td><td>${v.times_used}</td><td>${hasFile}</td><td>${toggleBtn}</td></tr>`;
+  }).join('');
+  tbody.querySelectorAll('.toggle-active-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const videoId = btn.dataset.videoId;
+      const currentlyActive = btn.dataset.active === '1';
+      const newActive = !currentlyActive;
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/library/videos/' + videoId + '/active', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active: newActive })
+        });
+        if (res.ok) {
+          btn.dataset.active = newActive ? '1' : '0';
+          btn.textContent = newActive ? 'Active' : 'Paused';
+          btn.style.background = newActive ? '#22c55e' : '#e5e7eb';
+          btn.style.color = newActive ? '#fff' : '#6b7280';
+        }
+      } catch(e) {}
+      btn.disabled = false;
+    });
+  });
+}
+
+function applyFilter() {
+  const val = modelFilter.value;
+  const filtered = val ? allVideos.filter(v => String(v.model_id) === val) : allVideos;
+  render(filtered);
+}
+
+function load() {
+  fetch('/api/library/videos').then(r => r.json()).then(data => {
+    allVideos = data.videos;
+    // Populate model filter from unique models in the video list
+    const seen = {};
+    allVideos.forEach(v => { if (v.model_id && v.model_name) seen[v.model_id] = v.model_name; });
+    const opts = Object.entries(seen).sort((a,b) => a[1].localeCompare(b[1]))
+      .map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+    modelFilter.innerHTML = '<option value="">All models</option>' + opts;
+    applyFilter();
+  });
+}
+
+modelFilter.addEventListener('change', applyFilter);
+
+// Load models for the "Add video" form
+fetch('/api/models').then(r => r.json()).then(data => {
+  const opts = (data.models || []).sort((a,b) => a.name.localeCompare(b.name))
+    .map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  addModelSelect.innerHTML = '<option value="">— Unassigned —</option>' + opts;
+});
+
+addForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const submitBtn = addForm.querySelector('button[type=submit]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Uploading…';
+  addFeedback.textContent = 'Uploading and converting — this may take a minute for large files…';
+  addFeedback.className = 'feedback';
+  const fd = new FormData(addForm);
+  try {
+    const res = await fetch('/api/library/videos', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (res.ok) {
+      addFeedback.textContent = 'Added ' + data.id + ' successfully.';
+      addFeedback.className = 'feedback ok';
+      addForm.reset();
+      load();
+    } else {
+      addFeedback.textContent = data.error || 'Error adding video.';
+      addFeedback.className = 'feedback err';
+    }
+  } catch (e) {
+    addFeedback.textContent = 'Network error — please try again.';
+    addFeedback.className = 'feedback err';
+  }
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Add video';
+});
+
+load();
+</script>
+</body>
+</html>
