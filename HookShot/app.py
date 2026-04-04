@@ -329,7 +329,7 @@ def _drive_upload(file_path, folder_id):
 
         DRIVE_CREDS_PATH,
 
-        scopes=['https://www.googleapis.com/auth/drive.file'],
+        scopes=['https://www.googleapis.com/auth/drive'],
 
     )
 
@@ -339,7 +339,7 @@ def _drive_upload(file_path, folder_id):
 
     media = MediaFileUpload(file_path, mimetype='video/mp4', resumable=True)
 
-    result = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    result = service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
 
     return result.get('id')
 
