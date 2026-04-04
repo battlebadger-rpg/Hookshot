@@ -160,6 +160,14 @@ TG_PENDING_FILE = os.path.join(ROOT, 'telegram_pending.json')
 
 
 
+# ── Google Drive ──────────────────────────────────────────────────────────────
+
+DRIVE_CREDS_PATH   = os.environ.get('GOOGLE_DRIVE_CREDENTIALS_PATH', '')
+
+DRIVE_FOLDERS_FILE = os.path.join(ROOT, 'drive_folders.json')
+
+
+
 AUTO_LOG_FILE       = '/var/log/hookshot_auto.log'
 
 _auto_deliver_running = threading.Event()
@@ -293,9 +301,53 @@ def _tg_send_video(chat_id, file_path, caption='', thread_id=None):
 
 
 
+def _load_drive_folders():
+
+    """Load model → Drive folder ID mapping from drive_folders.json."""
+
+    if not os.path.exists(DRIVE_FOLDERS_FILE):
+
+        return {}
+
+    with open(DRIVE_FOLDERS_FILE, 'r', encoding='utf-8') as f:
+
+        return json.load(f)
+
+
+
+def _drive_upload(file_path, folder_id):
+
+    """Upload file_path to the given Google Drive folder ID. Returns file ID on success."""
+
+    from googleapiclient.discovery import build
+
+    from googleapiclient.http import MediaFileUpload
+
+    from google.oauth2 import service_account
+
+    creds = service_account.Credentials.from_service_account_file(
+
+        DRIVE_CREDS_PATH,
+
+        scopes=['https://www.googleapis.com/auth/drive.file'],
+
+    )
+
+    service = build('drive', 'v3', credentials=creds)
+
+    file_metadata = {'name': os.path.basename(file_path), 'parents': [folder_id]}
+
+    media = MediaFileUpload(file_path, mimetype='video/mp4', resumable=True)
+
+    result = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+
+    return result.get('id')
+
+
+
 def _run_auto_deliver_account(account_id, account_name, model_id, model_name, tg_chat_id, tg_topic_id):
 
-    """Background: generate 5 videos for one account and send to its Telegram group/topic."""
+    """Background: generate 5 videos for one account and upload to Google Drive."""
 
     BATCH_SIZE = 5
 
@@ -306,6 +358,22 @@ def _run_auto_deliver_account(account_id, account_name, model_id, model_name, tg
     POS_Y      = 0.5
 
     batch_dir  = None
+
+    drive_folders = _load_drive_folders()
+
+    folder_id = next(
+
+        (v for k, v in drive_folders.items() if k.lower() == (model_name or '').lower()),
+
+        None,
+
+    )
+
+    if not folder_id:
+
+        _auto_log({'account': account_name, 'skipped': 'no_drive_folder', 'model': model_name})
+
+        return
 
 
 
@@ -497,11 +565,13 @@ def _run_auto_deliver_account(account_id, account_name, model_id, model_name, tg
 
                 conn.commit()
 
-                tg_result = _tg_send_video(tg_chat_id, out_path, thread_id=tg_topic_id)
+                try:
 
-                if tg_result is not True:
+                    _drive_upload(out_path, folder_id)
 
-                    _auto_log({'account': account_name, 'video': video_id, 'tg_error': str(tg_result)})
+                except Exception as drive_err:
+
+                    _auto_log({'account': account_name, 'video': video_id, 'drive_error': str(drive_err)})
 
                 try:
 
@@ -644,7 +714,7 @@ def api_auto_deliver():
 
         LEFT JOIN models m ON a.model_id = m.id
 
-        WHERE a.auto_deliver=1 AND a.tg_chat_id IS NOT NULL
+        WHERE a.auto_deliver=1
 
     """)
 
@@ -685,6 +755,167 @@ def api_auto_deliver():
     t.start()
 
     return jsonify(status='started', accounts=launched)
+
+
+
+@app.route('/api/render-overlay', methods=['POST'])
+
+def api_render_overlay():
+
+    """On-demand: receive an external video, render text overlay, upload to Drive."""
+
+    key = request.headers.get('X-Auto-Key', '')
+
+    if not AUTO_DELIVER_KEY or key != AUTO_DELIVER_KEY:
+
+        return jsonify(error='forbidden'), 403
+
+    video_file = request.files.get('video')
+
+    model      = (request.form.get('model') or '').strip()
+
+    overlay_id = (request.form.get('overlay_id') or '').strip()
+
+    if not video_file or not model or not overlay_id:
+
+        return jsonify(error='video, model, and overlay_id are required'), 400
+
+    # Resolve Drive folder for this model
+
+    drive_folders = _load_drive_folders()
+
+    folder_id = next(
+
+        (v for k, v in drive_folders.items() if k.lower() == model.lower()),
+
+        None,
+
+    )
+
+    if not folder_id:
+
+        return jsonify(error=f'No Drive folder configured for model: {model}'), 400
+
+    # Strip "ov" prefix to get caption DB id (e.g. "ov034" -> "034")
+
+    cap_id = overlay_id[2:] if overlay_id.lower().startswith('ov') else overlay_id
+
+    conn = db.get_connection()
+
+    cur  = conn.cursor()
+
+    cur.execute("SELECT caption FROM captions WHERE id=?", (cap_id,))
+
+    row = cur.fetchone()
+
+    conn.close()
+
+    if not row:
+
+        return jsonify(error=f'overlay_id not found in caption library: {overlay_id}'), 400
+
+    caption_text = row[0]
+
+    # Save uploaded video to a temp path
+
+    original_name = video_file.filename or 'video.mp4'
+
+    base_name     = os.path.splitext(original_name)[0]
+
+    tmp_id        = uuid.uuid4().hex
+
+    tmp_in        = os.path.join(UPLOAD_DIR, f'overlay_in_{tmp_id}.mp4')
+
+    out_name      = f'{model}_{overlay_id}_{base_name}.mp4'
+
+    tmp_out       = os.path.join(UPLOAD_DIR, f'overlay_out_{tmp_id}.mp4')
+
+    try:
+
+        video_file.save(tmp_in)
+
+        # Probe video for height to compute font size
+
+        probe = subprocess.run(
+
+            [FFPROBE, '-v', 'quiet', '-print_format', 'json', '-show_streams', tmp_in],
+
+            capture_output=True, text=True, timeout=30,
+
+        )
+
+        try:
+
+            info = json.loads(probe.stdout)
+
+            vh   = int(next(s for s in info['streams'] if s['codec_type'] == 'video')['height'])
+
+        except Exception:
+
+            return jsonify(error='Could not probe uploaded video'), 500
+
+        FONT_PCT = 3.5
+
+        font_sz  = int((FONT_PCT / 100) * vh)
+
+        render_ok = _render_video(tmp_in, caption_text, tmp_out, font_sz, pos_y=0.5, text_style='clean')
+
+        if not render_ok:
+
+            return jsonify(error='FFmpeg render failed'), 500
+
+        # Rename output to final filename for Drive upload
+
+        final_path = os.path.join(UPLOAD_DIR, out_name)
+
+        os.replace(tmp_out, final_path)
+
+        try:
+
+            _drive_upload(final_path, folder_id)
+
+        except Exception as drive_err:
+
+            return jsonify(error=f'Drive upload failed: {drive_err}'), 500
+
+        return jsonify(
+
+            status='ok',
+
+            overlay_id=overlay_id,
+
+            drive_filename=out_name,
+
+            drive_folder=f'{model.title()}/hookshot',
+
+        )
+
+    finally:
+
+        for p in (tmp_in, tmp_out):
+
+            try:
+
+                if os.path.exists(p):
+
+                    os.remove(p)
+
+            except OSError:
+
+                pass
+
+        final_path_local = os.path.join(UPLOAD_DIR, out_name)
+
+        try:
+
+            if os.path.exists(final_path_local):
+
+                os.remove(final_path_local)
+
+        except OSError:
+
+            pass
+
 
 
 
