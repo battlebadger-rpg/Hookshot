@@ -758,6 +758,240 @@ def api_auto_deliver():
 
 
 
+@app.route('/api/test-deliver', methods=['POST'])
+
+def api_test_deliver():
+
+    """Test endpoint: run auto-delivery pipeline for one model, generating 1 video."""
+
+    key = request.headers.get('X-Auto-Key', '')
+
+    if not AUTO_DELIVER_KEY or key != AUTO_DELIVER_KEY:
+
+        return jsonify(error='forbidden'), 403
+
+    data       = request.get_json(silent=True) or {}
+
+    model_name = (data.get('model') or '').strip()
+
+    if not model_name:
+
+        return jsonify(error='model is required'), 400
+
+    conn = db.get_connection()
+
+    cur  = conn.cursor()
+
+    cur.execute("SELECT id FROM models WHERE name=?", (model_name,))
+
+    row = cur.fetchone()
+
+    if not row:
+
+        conn.close()
+
+        return jsonify(error=f'Model not found: {model_name}'), 404
+
+    model_id = row[0]
+
+    cur.execute("SELECT id, name FROM accounts WHERE model_id=? LIMIT 1", (model_id,))
+
+    acc_row = cur.fetchone()
+
+    conn.close()
+
+    if not acc_row:
+
+        return jsonify(error=f'No account found for model: {model_name}'), 404
+
+    account_id, account_name = acc_row
+
+    drive_folders = _load_drive_folders()
+
+    folder_id = next(
+
+        (v for k, v in drive_folders.items() if k.lower() == model_name.lower()),
+
+        None,
+
+    )
+
+    if not folder_id:
+
+        return jsonify(error=f'No Drive folder configured for model: {model_name}'), 400
+
+    BATCH_SIZE = 1
+
+    TEXT_STYLE = 'clean'
+
+    FONT_PCT   = 3.5
+
+    POS_Y      = 0.5
+
+    batch_dir  = None
+
+    conn = db.get_connection()
+
+    cur  = conn.cursor()
+
+    try:
+
+        cur.execute(
+
+            """SELECT id, caption, COALESCE(times_used,0) FROM captions
+
+               WHERE COALESCE(active,1)=1
+
+               AND (models='' OR models IS NULL
+
+                    OR (',' || REPLACE(models,';',',') || ',') LIKE ('%,' || ? || ',%'))""",
+
+            (model_name,)
+
+        )
+
+        captions_raw = cur.fetchall()
+
+        cur.execute(
+
+            "SELECT id, COALESCE(times_used,0) FROM videos WHERE model_id=? AND COALESCE(active,1)=1",
+
+            (model_id,)
+
+        )
+
+        video_rows = [(r[0], r[1]) for r in cur.fetchall()
+
+                      if os.path.isfile(os.path.join(LIBRARY_VIDEOS_DIR, r[0] + '.mp4'))]
+
+        if not captions_raw or not video_rows:
+
+            return jsonify(error='No videos or captions available for this model'), 400
+
+        video_heights = {}
+
+        for vid_id, _ in video_rows:
+
+            try:
+
+                src   = os.path.join(LIBRARY_VIDEOS_DIR, vid_id + '.mp4')
+
+                probe = subprocess.run(
+
+                    [FFPROBE, '-v', 'quiet', '-print_format', 'json', '-show_streams', src],
+
+                    capture_output=True, text=True, timeout=30,
+
+                )
+
+                info = json.loads(probe.stdout)
+
+                vh   = int(next(s for s in info['streams'] if s['codec_type'] == 'video')['height'])
+
+                video_heights[vid_id] = vh
+
+            except Exception:
+
+                pass
+
+        valid_videos = [(vid, used) for vid, used in video_rows if vid in video_heights]
+
+        if not valid_videos:
+
+            return jsonify(error='No readable videos available for this model'), 400
+
+        captions_sorted = sorted(captions_raw, key=lambda x: x[2])
+
+        videos_sorted   = sorted(valid_videos,  key=lambda x: x[1])
+
+        batch_id  = str(uuid.uuid4())
+
+        batch_dir = os.path.join(OUTPUT_DIR, batch_id)
+
+        os.makedirs(batch_dir, exist_ok=True)
+
+        label = f"Test {datetime.now().strftime('%Y-%m-%d')} — {account_name}"
+
+        cur.execute("INSERT INTO batches (id, account_id, week_of) VALUES (?,?,?)", (batch_id, account_id, label))
+
+        cur.execute("SELECT next FROM output_seq")
+
+        seq_start = cur.fetchone()[0]
+
+        cur.execute("UPDATE output_seq SET next = next + ?", (BATCH_SIZE,))
+
+        conn.commit()
+
+        cap_id, caption_text, _ = captions_sorted[0]
+
+        video_id, _             = videos_sorted[0]
+
+        src      = os.path.join(LIBRARY_VIDEOS_DIR, video_id + '.mp4')
+
+        font_sz  = int((FONT_PCT / 100) * video_heights[video_id])
+
+        out_name = f"{seq_start:05d}.mp4"
+
+        out_path = os.path.join(batch_dir, out_name)
+
+        render_ok = _render_video(src, caption_text, out_path, font_sz, POS_Y, TEXT_STYLE)
+
+        if not render_ok:
+
+            return jsonify(error='Render failed'), 500
+
+        cur.execute(
+
+            """INSERT INTO batch_items (batch_id, video_id, caption_id, output_filename, posted_at)
+
+               VALUES (?,?,?,?,datetime('now'))""",
+
+            (batch_id, video_id, cap_id, out_name),
+
+        )
+
+        cur.execute("UPDATE captions SET times_used=times_used+1 WHERE id=?", (cap_id,))
+
+        cur.execute("UPDATE videos  SET times_used=times_used+1 WHERE id=?", (video_id,))
+
+        conn.commit()
+
+        drive_file_id = None
+
+        try:
+
+            drive_file_id = _drive_upload(out_path, folder_id)
+
+        except Exception as drive_err:
+
+            return jsonify(error=f'Drive upload failed: {drive_err}'), 500
+
+        try:
+
+            os.remove(out_path)
+
+        except OSError:
+
+            pass
+
+        return jsonify(status='ok', model=model_name, account=account_name,
+
+                       output=out_name, drive_file_id=drive_file_id)
+
+    except Exception as e:
+
+        return jsonify(error=str(e)), 500
+
+    finally:
+
+        conn.close()
+
+        if batch_dir:
+
+            shutil.rmtree(batch_dir, ignore_errors=True)
+
+
+
 @app.route('/api/render-overlay', methods=['POST'])
 
 def api_render_overlay():
