@@ -2501,6 +2501,138 @@ def api_batch_download_route(job_id):
     dl_name = f'hookshot_{slug}_{datetime.now().strftime("%Y%m%d")}.zip'
     return _sf(zip_path, mimetype='application/zip', as_attachment=True, download_name=dl_name)
 
+@app.route('/api/deliver', methods=['POST'])
+@login_required
+def api_deliver():
+    """Manual Drive delivery: render and upload videos for each model in drive_folders.json."""
+    if not DRIVE_CREDS_PATH:
+        return jsonify(error='Google Drive credentials not configured'), 400
+
+    data = request.json or {}
+    requested_models = data.get('models')  # None = all models
+    count = int(data.get('count', 1))
+    count = max(1, count)
+
+    drive_folders = _load_drive_folders()
+    if not drive_folders:
+        return jsonify(error='No Drive folders configured in drive_folders.json'), 400
+
+    model_names = requested_models if requested_models else list(drive_folders.keys())
+
+    FONT_PCT   = 3.5
+    POS_Y      = 0.5
+    TEXT_STYLE = 'clean'
+
+    results = []
+    total_uploaded = 0
+    total_errors   = 0
+
+    conn = db.get_connection()
+    cur  = conn.cursor()
+    try:
+        for model_name in model_names:
+            folder_id = next(
+                (v for k, v in drive_folders.items() if k.lower() == model_name.lower()),
+                None,
+            )
+            if not folder_id:
+                results.append({'model': model_name, 'uploaded': 0, 'errors': 0,
+                                 'skipped': True, 'reason': 'No Drive folder configured'})
+                continue
+
+            cur.execute("SELECT id FROM models WHERE LOWER(name)=LOWER(?)", (model_name,))
+            row = cur.fetchone()
+            if not row:
+                results.append({'model': model_name, 'uploaded': 0, 'errors': 1,
+                                 'reason': 'Model not found in database'})
+                total_errors += 1
+                continue
+            model_id = row[0]
+
+            cur.execute(
+                "SELECT id FROM videos WHERE model_id=? AND COALESCE(active,1)=1",
+                (model_id,)
+            )
+            video_rows = [r[0] for r in cur.fetchall()
+                          if os.path.isfile(os.path.join(LIBRARY_VIDEOS_DIR, r[0] + '.mp4'))]
+
+            cur.execute(
+                """SELECT id, caption FROM captions
+                   WHERE COALESCE(active,1)=1
+                   AND (models='' OR models IS NULL
+                        OR (',' || REPLACE(models,';',',') || ',') LIKE ('%,' || ? || ',%'))""",
+                (model_name,)
+            )
+            captions = cur.fetchall()
+
+            if not video_rows or not captions:
+                reason = 'No videos found' if not video_rows else 'No captions found'
+                results.append({'model': model_name, 'uploaded': 0, 'errors': 1, 'reason': reason})
+                total_errors += 1
+                continue
+
+            # Probe heights
+            video_heights = {}
+            for vid_id in video_rows:
+                try:
+                    src   = os.path.join(LIBRARY_VIDEOS_DIR, vid_id + '.mp4')
+                    probe = subprocess.run(
+                        [FFPROBE, '-v', 'quiet', '-print_format', 'json', '-show_streams', src],
+                        capture_output=True, text=True, timeout=30,
+                    )
+                    info  = json.loads(probe.stdout)
+                    vh    = int(next(s for s in info['streams'] if s['codec_type'] == 'video')['height'])
+                    video_heights[vid_id] = vh
+                except Exception:
+                    pass
+            valid_videos = [v for v in video_rows if v in video_heights]
+            if not valid_videos:
+                results.append({'model': model_name, 'uploaded': 0, 'errors': 1,
+                                 'reason': 'Could not probe any video files'})
+                total_errors += 1
+                continue
+
+            all_combos = [(v, c[0], c[1]) for v in valid_videos for c in captions]
+            random.shuffle(all_combos)
+            selected = all_combos[:count]
+
+            uploaded = 0
+            errors   = 0
+            for video_id, cap_id, caption_text in selected:
+                src      = os.path.join(LIBRARY_VIDEOS_DIR, video_id + '.mp4')
+                font_sz  = int(FONT_PCT / 100 * video_heights[video_id])
+                tmp_name = f'deliver_{uuid.uuid4().hex}.mp4'
+                tmp_path = os.path.join(UPLOAD_DIR, tmp_name)
+                try:
+                    ok = _render_video(src, caption_text, tmp_path, font_sz, POS_Y, TEXT_STYLE)
+                    if not ok:
+                        errors += 1
+                        continue
+                    try:
+                        _drive_upload(tmp_path, folder_id)
+                        cur.execute("UPDATE captions SET times_used=times_used+1 WHERE id=?", (cap_id,))
+                        cur.execute("UPDATE videos  SET times_used=times_used+1 WHERE id=?", (video_id,))
+                        conn.commit()
+                        uploaded += 1
+                    except Exception:
+                        errors += 1
+                finally:
+                    try:
+                        if os.path.exists(tmp_path):
+                            os.remove(tmp_path)
+                    except OSError:
+                        pass
+
+            results.append({'model': model_name, 'uploaded': uploaded, 'errors': errors})
+            total_uploaded += uploaded
+            total_errors   += errors
+
+    finally:
+        conn.close()
+
+    return jsonify(results=results, total_uploaded=total_uploaded, total_errors=total_errors)
+
+
 if __name__ == '__main__':
 
     import webbrowser

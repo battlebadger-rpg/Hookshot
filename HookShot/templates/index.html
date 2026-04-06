@@ -126,6 +126,13 @@ select, input[type=text] { padding: 10px 14px; border: 1px solid #e8e8e8; border
   </div>
   <!-- Batch notifications area — fire-and-forget queue -->
   <div id="batchQueue"></div>
+
+  <div class="card">
+    <div class="card-title">Deliver to Drive</div>
+    <div class="card-sub">Render one video per model and upload directly to the configured Google Drive folders.</div>
+    <button class="btn" id="deliverBtn">Deliver to Drive</button>
+    <div id="deliverStatus" class="feedback" style="display:none"></div>
+  </div>
 </div>
 <script>
 const accountSelect = document.getElementById('accountSelect');
@@ -223,6 +230,38 @@ function updateBatchCard(notifId, batchId, count, error) {
 const style = document.createElement('style');
 style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
 document.head.appendChild(style);
+
+const deliverBtn = document.getElementById('deliverBtn');
+const deliverStatus = document.getElementById('deliverStatus');
+
+deliverBtn.addEventListener('click', () => {
+  deliverBtn.disabled = true;
+  deliverStatus.style.display = '';
+  deliverStatus.className = 'feedback';
+  deliverStatus.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;margin-right:6px">&#9696;</span> Uploading to Drive…';
+
+  fetch('/api/deliver', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok) {
+        deliverStatus.className = 'feedback err';
+        deliverStatus.textContent = data.error || 'Delivery failed';
+      } else {
+        const lines = data.results.map(r => {
+          if (r.skipped) return `${r.model}: skipped (${r.reason})`;
+          if (r.reason && r.uploaded === 0) return `${r.model}: error — ${r.reason}`;
+          return `${r.model}: ${r.uploaded} uploaded${r.errors ? ', ' + r.errors + ' failed' : ''}`;
+        });
+        deliverStatus.className = 'feedback ok';
+        deliverStatus.innerHTML = `Done — ${data.total_uploaded} uploaded, ${data.total_errors} errors<br><span style="font-size:12px;color:#666">${lines.join(' &bull; ')}</span>`;
+      }
+    })
+    .catch(() => {
+      deliverStatus.className = 'feedback err';
+      deliverStatus.textContent = 'Request failed';
+    })
+    .finally(() => { deliverBtn.disabled = false; });
+});
 
 createBtn.addEventListener('click', () => {
   const account_id = accountSelect.value;
