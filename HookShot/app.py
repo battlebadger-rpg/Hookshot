@@ -36,6 +36,8 @@ import urllib.error
 
 from datetime import datetime
 
+from dotenv import load_dotenv
+load_dotenv()
 
 
 # Path helpers (same as SnapText)
