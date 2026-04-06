@@ -13,7 +13,7 @@ Environment=GOOGLE_DRIVE_CREDENTIALS_PATH=/root/hookshot/service-account.json
 KillMode=control-group
 TimeoutStopSec=10
 ExecStartPre=/bin/sleep 2
-ExecStart=/root/hookshot/HookShot/venv/bin/gunicorn --preload -w 1 --timeout 300 -b 127.0.0.1:5002 --access-logfile /var/log/hookshot/access.log --error-logfile /var/log/hookshot/error.log --capture-output app:app
+ExecStart=/root/hookshot/HookShot/venv/bin/gunicorn --preload -w 1 --timeout 300 -b 127.0.0.1:5002 --access-logfile /var/log/hookshot/access.log --error-logfile /var/log/hookshot/error.log app:app
 Restart=always
 RestartSec=3
 
