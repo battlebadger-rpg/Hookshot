@@ -100,31 +100,6 @@ header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shr
 .approve-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .approve-bar .summary { font-size: 13px; color: #888; }
 
-/* Telegram */
-.tg-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 16px; background: #f0f9ff; border: 1px solid #bae6fd; flex-wrap: wrap; }
-.tg-bar.connected { background: #f0fdf4; border-color: #bbf7d0; }
-.tg-bar .tg-label { flex: 1; color: #555; }
-.tg-bar .tg-label strong { color: #333; }
-.btn-tg { padding: 6px 14px; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; touch-action: manipulation; white-space: nowrap; }
-.btn-tg-connect { background: #0088cc; color: #fff; }
-.btn-tg-connect:hover { background: #0077b5; }
-.btn-tg-disconnect { background: #f0f0f0; color: #999; }
-.btn-tg-disconnect:hover { background: #e0e0e0; }
-.btn-send-tg { padding: 9px 16px; border: none; border-radius: 8px; background: #0088cc; font-size: 13px; font-weight: 600; cursor: pointer; color: #fff; transition: all 0.15s; font-family: 'Inter', sans-serif; white-space: nowrap; touch-action: manipulation; }
-.btn-send-tg:hover { background: #0077b5; }
-.btn-send-tg:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
-.tg-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.tg-modal { background: #fff; border-radius: 20px; padding: 28px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-.tg-modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.tg-modal p { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.5; }
-.tg-code-box { background: #f4f4f4; border-radius: 10px; padding: 14px; text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 4px; color: #1a1a1a; margin-bottom: 16px; }
-.tg-modal .tg-steps { font-size: 12px; color: #888; line-height: 1.8; margin-bottom: 20px; }
-.tg-modal .tg-steps span { display: block; }
-.btn-tg-open { display: block; width: 100%; padding: 12px; border: none; border-radius: 10px; background: #0088cc; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; text-align: center; text-decoration: none; margin-bottom: 10px; touch-action: manipulation; }
-.btn-tg-open:hover { background: #0077b5; }
-.btn-tg-cancel { display: block; width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; color: #999; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; touch-action: manipulation; }
-.tg-waiting { font-size: 12px; color: #bbb; text-align: center; margin-top: 12px; }
-
 @media (max-width: 700px) {
   .batch-layout { grid-template-columns: 1fr; }
   .preview-panel { position: static; }
@@ -153,31 +128,7 @@ header .signout { font-size: 12px; color: #999; border: 1px solid #eee; flex-shr
         <div class="card-sub" id="batchSub"></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn-send-tg" id="sendTgBtn" style="display:none" disabled>Send to Telegram</button>
         <button class="btn btn-green" id="downloadApprovedBtn" disabled>Download approved</button>
-      </div>
-    </div>
-
-    <div class="tg-bar" id="tgBar" style="display:none">
-      <span>✈️</span>
-      <span class="tg-label" id="tgLabel">Connect Telegram to send approved videos to your phone</span>
-      <button class="btn-tg btn-tg-connect" id="tgConnectBtn">Connect Telegram</button>
-    </div>
-
-    <!-- Telegram modal -->
-    <div class="tg-modal-overlay" id="tgModal" style="display:none">
-      <div class="tg-modal">
-        <h3>Connect Telegram</h3>
-        <p>Open the HookShot bot in Telegram and send the code below to link your account.</p>
-        <div class="tg-code-box" id="tgCode">——</div>
-        <div class="tg-steps">
-          <span>1. Click the button below to open the bot</span>
-          <span>2. Press <strong>Start</strong> in Telegram</span>
-          <span>3. The code is sent automatically</span>
-        </div>
-        <a class="btn-tg-open" id="tgBotLink" href="#" target="_blank" rel="noopener">Open HookShot Bot →</a>
-        <button class="btn-tg-cancel" id="tgCancelBtn">Cancel</button>
-        <div class="tg-waiting" id="tgWaiting">Waiting for connection…</div>
       </div>
     </div>
 
@@ -264,7 +215,6 @@ function updateApprovalUI() {
   const pending = total - approved - rejected;
   approveSummary.textContent = `${approved} approved · ${rejected} rejected · ${pending} pending`;
   downloadApprovedBtn.disabled = approved === 0;
-  if (tgConnected) sendTgBtn.disabled = approved === 0;
 }
 
 function setActiveItem(it) {
@@ -354,117 +304,6 @@ downloadApprovedBtn.addEventListener('click', async () => {
   downloadApprovedBtn.disabled = false;
   downloadApprovedBtn.textContent = 'Download approved';
 });
-
-// ── Telegram ──────────────────────────────────────────────────────────────
-const tgBar = document.getElementById('tgBar');
-const tgLabel = document.getElementById('tgLabel');
-const tgConnectBtn = document.getElementById('tgConnectBtn');
-const tgModal = document.getElementById('tgModal');
-const tgCode = document.getElementById('tgCode');
-const tgBotLink = document.getElementById('tgBotLink');
-const tgCancelBtn = document.getElementById('tgCancelBtn');
-const sendTgBtn = document.getElementById('sendTgBtn');
-let tgConnected = false;
-let tgPollInterval = null;
-
-async function refreshTgStatus() {
-  try {
-    const res = await fetch('/api/telegram/status');
-    const data = await res.json();
-    tgConnected = data.connected;
-    tgBar.style.display = 'flex';
-    if (tgConnected) {
-      tgBar.className = 'tg-bar connected';
-      tgLabel.innerHTML = '<strong>Telegram connected</strong> — approved videos will be sent to your Telegram';
-      tgConnectBtn.textContent = 'Disconnect';
-      tgConnectBtn.className = 'btn-tg btn-tg-disconnect';
-      sendTgBtn.style.display = '';
-      sendTgBtn.disabled = approvedSet.size === 0;
-    } else {
-      tgBar.className = 'tg-bar';
-      tgLabel.textContent = 'Connect Telegram to send approved videos directly to your phone';
-      tgConnectBtn.textContent = 'Connect Telegram';
-      tgConnectBtn.className = 'btn-tg btn-tg-connect';
-      sendTgBtn.style.display = 'none';
-    }
-  } catch (e) {}
-}
-
-tgConnectBtn.addEventListener('click', async () => {
-  if (tgConnected) {
-    await fetch('/api/telegram/disconnect', { method: 'POST' });
-    refreshTgStatus();
-    return;
-  }
-  const res = await fetch('/api/telegram/connect');
-  const data = await res.json();
-  tgCode.textContent = data.code;
-  if (data.bot_username) {
-    tgBotLink.href = `https://t.me/${data.bot_username}?start=${data.code}`;
-  } else {
-    tgBotLink.textContent = '(Bot not configured yet)';
-    tgBotLink.href = '#';
-  }
-  tgModal.style.display = 'flex';
-  tgPollInterval = setInterval(async () => {
-    const r = await fetch('/api/telegram/status');
-    const d = await r.json();
-    if (d.connected) {
-      clearInterval(tgPollInterval);
-      tgModal.style.display = 'none';
-      refreshTgStatus();
-    }
-  }, 2000);
-});
-
-tgCancelBtn.addEventListener('click', () => {
-  clearInterval(tgPollInterval);
-  tgModal.style.display = 'none';
-});
-
-sendTgBtn.addEventListener('click', async () => {
-  if (approvedSet.size === 0) return;
-  const approvedFilenames = batchItems
-    .filter(it => approvedSet.has(it.id) && it.output_filename)
-    .map(it => it.output_filename);
-  sendTgBtn.disabled = true;
-  sendTgBtn.textContent = 'Sending…';
-  try {
-    const res = await fetch('/api/telegram/send-batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ batch_id: batchId, files: approvedFilenames }),
-    });
-    const data = await res.json().catch(() => ({ error: 'Server error' }));
-    if (res.ok) {
-      if (data.status === 'sending') {
-        sendTgBtn.textContent = 'Sending in background — check Telegram';
-        setTimeout(() => { sendTgBtn.textContent = 'Send to Telegram'; sendTgBtn.disabled = false; }, 3000);
-      } else if (data.sent > 0) {
-        const total = (data.sent || 0) + (data.failed || 0);
-        sendTgBtn.textContent = data.failed > 0
-          ? `Sent ${data.sent} of ${total} (${data.failed} failed)`
-          : `Sent ${data.sent}!`;
-        setTimeout(() => { sendTgBtn.textContent = 'Send to Telegram'; sendTgBtn.disabled = false; }, 4000);
-      } else {
-        sendTgBtn.textContent = data.error ? (data.error.slice(0, 50) + (data.error.length > 50 ? '…' : '')) : 'Failed — retry';
-        sendTgBtn.disabled = false;
-      }
-    } else if (data.error === 'not_connected') {
-      sendTgBtn.textContent = 'Not connected';
-      sendTgBtn.disabled = false;
-      refreshTgStatus();
-    } else {
-      sendTgBtn.textContent = data.error || 'Failed — retry';
-      sendTgBtn.disabled = false;
-    }
-  } catch (e) {
-    sendTgBtn.textContent = 'Failed — retry';
-    sendTgBtn.disabled = false;
-  }
-});
-
-refreshTgStatus();
 
 loadApprovals();
 
