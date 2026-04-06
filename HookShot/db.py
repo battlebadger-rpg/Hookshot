@@ -48,16 +48,6 @@ def migrate_db():
     if 'active' not in ccols:
         cur.execute("ALTER TABLE captions ADD COLUMN active INTEGER DEFAULT 1")
         cur.execute("UPDATE captions SET active = 1 WHERE active IS NULL")
-    # tg_chat_id, tg_topic_id, auto_deliver columns on accounts
-    cur.execute("PRAGMA table_info(accounts)")
-    acols = [r[1] for r in cur.fetchall()]
-    for col, defn in [
-        ('tg_chat_id',   'TEXT'),
-        ('tg_topic_id',  'INTEGER'),
-        ('auto_deliver', 'INTEGER DEFAULT 0'),
-    ]:
-        if col not in acols:
-            cur.execute(f'ALTER TABLE accounts ADD COLUMN {col} {defn}')
     # output_seq — global counter for output filenames
     cur.execute("CREATE TABLE IF NOT EXISTS output_seq (next INTEGER)")
     cur.execute("SELECT COUNT(*) FROM output_seq")

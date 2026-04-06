@@ -56,26 +56,6 @@ select, input[type=text] { padding: 10px 14px; border: 1px solid #e8e8e8; border
 .style-preview.classic { background: rgba(0,0,0,0.72); color: #fff; }
 .style-preview.clean { color: #fff; -webkit-text-stroke: 1.5px #000; text-shadow: none; background: #888; border-radius: 5px; }
 
-.tg-bar { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; background: #f0f9ff; border: 1px solid #bae6fd; flex-wrap: wrap; }
-.tg-bar.connected { background: #f0fdf4; border-color: #bbf7d0; }
-.tg-bar .tg-label { flex: 1; color: #555; }
-.tg-bar .tg-label strong { color: #333; }
-.btn-tg { padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; touch-action: manipulation; white-space: nowrap; }
-.btn-tg-connect { background: #0088cc; color: #fff; }
-.btn-tg-connect:hover { background: #0077b5; }
-.btn-tg-disconnect { background: #f0f0f0; color: #666; }
-.btn-tg-disconnect:hover { background: #e0e0e0; }
-.tg-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-.tg-modal { background: #fff; border-radius: 20px; padding: 28px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-.tg-modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.tg-modal p { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.5; }
-.tg-code-box { background: #f4f4f4; border-radius: 10px; padding: 14px; text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 4px; color: #1a1a1a; margin-bottom: 16px; }
-.tg-modal .tg-steps { font-size: 12px; color: #888; line-height: 1.8; margin-bottom: 20px; }
-.tg-modal .tg-steps span { display: block; }
-.btn-tg-open { display: block; width: 100%; padding: 12px; border: none; border-radius: 10px; background: #0088cc; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; text-align: center; text-decoration: none; margin-bottom: 10px; touch-action: manipulation; }
-.btn-tg-open:hover { background: #0077b5; }
-.btn-tg-cancel { display: block; width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; color: #999; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; touch-action: manipulation; }
-.tg-waiting { font-size: 12px; color: #bbb; text-align: center; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -91,28 +71,6 @@ select, input[type=text] { padding: 10px 14px; border: 1px solid #e8e8e8; border
   <a href="/logout" class="signout">Sign out</a>
 </header>
 <div class="container">
-  <div class="tg-bar" id="tgBar" style="display:none">
-    <span>&#9993;</span>
-    <span class="tg-label" id="tgLabel">Connect Telegram to send approved videos to your phone</span>
-    <button class="btn-tg btn-tg-connect" id="tgConnectBtn">Connect to Telegram</button>
-  </div>
-
-  <div class="tg-modal-overlay" id="tgModal" style="display:none">
-    <div class="tg-modal">
-      <h3>Connect Telegram</h3>
-      <p>Open the HookShot bot in Telegram and send the code below to link your account.</p>
-      <div class="tg-code-box" id="tgCode">——</div>
-      <div class="tg-steps">
-        <span>1. Click the button below to open the bot</span>
-        <span>2. Press <strong>Start</strong> in Telegram</span>
-        <span>3. The code is sent automatically</span>
-      </div>
-      <a class="btn-tg-open" id="tgBotLink" href="#" target="_blank" rel="noopener">Open HookShot Bot &#8594;</a>
-      <button class="btn-tg-cancel" id="tgCancelBtn">Cancel</button>
-      <div class="tg-waiting" id="tgWaiting">Waiting for connection…</div>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-title">Create batch</div>
     <div class="card-sub">Set your options and click Create — your batch will generate in the background. You can queue multiple batches at once.</div>
@@ -198,69 +156,6 @@ stylePicker.querySelectorAll('.style-btn').forEach(btn => {
 
 const modelSelect = document.getElementById('modelSelect');
 let allAccounts = [];
-
-// ── Telegram (dashboard) ────────────────────────────────────────────────────
-const tgBar = document.getElementById('tgBar');
-const tgLabel = document.getElementById('tgLabel');
-const tgConnectBtn = document.getElementById('tgConnectBtn');
-const tgModal = document.getElementById('tgModal');
-const tgCode = document.getElementById('tgCode');
-const tgBotLink = document.getElementById('tgBotLink');
-const tgCancelBtn = document.getElementById('tgCancelBtn');
-let tgPollInterval = null;
-
-async function refreshTgStatus() {
-  try {
-    const res = await fetch('/api/telegram/status');
-    const data = await res.json();
-    tgBar.style.display = 'flex';
-    if (data.connected) {
-      tgBar.className = 'tg-bar connected';
-      tgLabel.innerHTML = '<strong>Telegram connected</strong> — approved videos will be sent to your Telegram';
-      tgConnectBtn.textContent = 'Disconnect from Telegram';
-      tgConnectBtn.className = 'btn-tg btn-tg-disconnect';
-    } else {
-      tgBar.className = 'tg-bar';
-      tgLabel.textContent = 'Connect Telegram to send approved videos directly to your phone';
-      tgConnectBtn.textContent = 'Connect to Telegram';
-      tgConnectBtn.className = 'btn-tg btn-tg-connect';
-    }
-  } catch (e) {}
-}
-
-tgConnectBtn.addEventListener('click', async () => {
-  if (tgConnectBtn.textContent.includes('Disconnect')) {
-    await fetch('/api/telegram/disconnect', { method: 'POST' });
-    refreshTgStatus();
-    return;
-  }
-  const res = await fetch('/api/telegram/connect');
-  const data = await res.json();
-  tgCode.textContent = data.code;
-  if (data.bot_username) {
-    tgBotLink.href = 'https://t.me/' + data.bot_username + '?start=' + data.code;
-  } else {
-    tgBotLink.textContent = '(Bot not configured yet)';
-    tgBotLink.href = '#';
-  }
-  tgModal.style.display = 'flex';
-  tgPollInterval = setInterval(async () => {
-    const r = await fetch('/api/telegram/status');
-    const d = await r.json();
-    if (d.connected) {
-      clearInterval(tgPollInterval);
-      tgModal.style.display = 'none';
-      refreshTgStatus();
-    }
-  }, 2000);
-});
-
-tgCancelBtn.addEventListener('click', () => {
-  clearInterval(tgPollInterval);
-  tgModal.style.display = 'none';
-});
-
-refreshTgStatus();
 
 function populateAccounts() {
   const modelId = modelSelect.value;
