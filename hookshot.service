@@ -1,0 +1,21 @@
+[Unit]
+Description=HookShot Flask app
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/hookshot/HookShot
+Environment=PATH=/root/hookshot/HookShot/venv/bin:/usr/bin
+Environment=HOOKSHOT_TELEGRAM_TOKEN=8549015220:AAGzRPdl_mg9Nv-Y6kj-cwxX78ZY-P8wzxk
+Environment="HOOKSHOT_AUTO_KEY=3c82e4de654f1952a498608c043d90e276e59bdbedaf2881"
+Environment=GOOGLE_DRIVE_CREDENTIALS_PATH=/root/hookshot/service-account.json
+KillMode=control-group
+TimeoutStopSec=10
+ExecStartPre=/bin/sleep 2
+ExecStart=/root/hookshot/HookShot/venv/bin/gunicorn --preload -w 1 --timeout 300 -b 127.0.0.1:5002 --access-logfile /var/log/hookshot/access.log --error-logfile /var/log/hookshot/error.log --capture-output app:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
