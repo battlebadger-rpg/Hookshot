@@ -2596,8 +2596,9 @@ def api_deliver():
             random.shuffle(all_combos)
             selected = all_combos[:count]
 
-            uploaded = 0
-            errors   = 0
+            uploaded      = 0
+            errors        = 0
+            error_details = []
             for video_id, cap_id, caption_text in selected:
                 src      = os.path.join(LIBRARY_VIDEOS_DIR, video_id + '.mp4')
                 font_sz  = int(FONT_PCT / 100 * video_heights[video_id])
@@ -2607,6 +2608,7 @@ def api_deliver():
                     ok = _render_video(src, caption_text, tmp_path, font_sz, POS_Y, TEXT_STYLE)
                     if not ok:
                         errors += 1
+                        error_details.append(f'{video_id}: FFmpeg render failed')
                         continue
                     try:
                         _drive_upload(tmp_path, folder_id)
@@ -2614,8 +2616,9 @@ def api_deliver():
                         cur.execute("UPDATE videos  SET times_used=times_used+1 WHERE id=?", (video_id,))
                         conn.commit()
                         uploaded += 1
-                    except Exception:
+                    except Exception as drive_err:
                         errors += 1
+                        error_details.append(f'{video_id}: Drive upload failed — {str(drive_err)[:200]}')
                 finally:
                     try:
                         if os.path.exists(tmp_path):
@@ -2623,7 +2626,8 @@ def api_deliver():
                     except OSError:
                         pass
 
-            results.append({'model': model_name, 'uploaded': uploaded, 'errors': errors})
+            results.append({'model': model_name, 'uploaded': uploaded, 'errors': errors,
+                             'error_details': error_details})
             total_uploaded += uploaded
             total_errors   += errors
 
