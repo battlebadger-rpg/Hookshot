@@ -20,5 +20,5 @@ jobs:
           apt-get update -qq && apt-get install -y -qq sshpass rsync
           export SSHPASS="$VPS_PASSWORD"
           sshpass -e ssh -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" \
-            "cd /root/hookshot && git fetch origin && git diff --name-only --diff-filter=A HEAD..origin/main | xargs -r rm -f && git pull origin main && cp /root/hookshot/HookShot/hookshot.service /etc/systemd/system/hookshot.service && systemctl daemon-reload && systemctl restart hookshot"
+            "cd /root/hookshot && git fetch origin && git diff --name-only --diff-filter=A HEAD..origin/main | xargs -r rm -f && git pull origin main && cp /root/hookshot/hookshot.service /etc/systemd/system/hookshot.service && systemctl daemon-reload && systemctl restart hookshot"
           echo "Deploy done."
