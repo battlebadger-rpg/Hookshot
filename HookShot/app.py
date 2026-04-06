@@ -565,13 +565,19 @@ def _run_auto_deliver_account(account_id, account_name, model_id, model_name, tg
 
                 conn.commit()
 
+                _auto_log({'account': account_name, 'video': video_id, 'drive_upload_start': os.path.basename(out_path), 'folder_id': folder_id})
+
                 try:
 
-                    _drive_upload(out_path, folder_id)
+                    drive_file_id = _drive_upload(out_path, folder_id)
+
+                    _auto_log({'account': account_name, 'video': video_id, 'drive_upload_ok': drive_file_id})
 
                 except Exception as drive_err:
 
-                    _auto_log({'account': account_name, 'video': video_id, 'drive_error': str(drive_err)})
+                    import traceback
+
+                    _auto_log({'account': account_name, 'video': video_id, 'drive_error': str(drive_err), 'drive_traceback': traceback.format_exc()})
 
                 try:
 
