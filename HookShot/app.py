@@ -714,7 +714,7 @@ def _render_video(src_path, caption_text, out_path, font_size, pos_y=0.5, text_s
 
         '-vf', vf,
 
-        '-c:v', 'libx264', '-preset', 'fast', '-crf', '28',
+        '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '32',
 
         '-c:a', 'copy',
 
