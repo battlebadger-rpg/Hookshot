@@ -710,15 +710,13 @@ def _render_video(src_path, caption_text, out_path, font_size, pos_y=0.5, text_s
 
     r = subprocess.run([
 
-        FFMPEG, '-y', '-noautorotate', '-i', src_path,
+        FFMPEG, '-y', '-i', src_path,
 
         '-vf', vf,
 
-        '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '32',
+        '-codec:a', 'copy',
 
-        '-c:a', 'copy',
-
-        '-metadata:s:v:0', 'rotate=0',
+        '-preset', 'ultrafast',
 
         out_path,
 
@@ -1726,13 +1724,15 @@ def _save_library_video(f, dest_id):
 
     else:
 
+        # Remux (stream-copy) rather than re-encode, so the only ffmpeg encode
+        # this video sees is the final render with the text overlay. Matches
+        # SnapText's single-encode pipeline.
+
         result = subprocess.run(
 
             [FFMPEG, '-y', '-i', tmp_path,
 
-             '-c:v', 'libx264', '-preset', 'fast', '-crf', '23',
-
-             '-c:a', 'aac', '-b:a', '128k',
+             '-c', 'copy',
 
              mp4_path],
 
@@ -2523,7 +2523,7 @@ def api_deliver():
 
     FONT_PCT   = 3.5
     POS_Y      = 0.5
-    TEXT_STYLE = 'clean'
+    TEXT_STYLE = 'classic'
 
     results = []
     total_uploaded = 0
