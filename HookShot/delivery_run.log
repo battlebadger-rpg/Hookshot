@@ -1,0 +1,112 @@
+[2026-04-10 19:14:38] Logging in as todd...
+[2026-04-10 19:14:42] Logged in.
+[2026-04-10 19:14:42] === Round 1: checking Drive counts ===
+[2026-04-10 19:14:46]   Annabelle: 1/105
+[2026-04-10 19:14:46]   Naomi: 1/28
+[2026-04-10 19:14:46]   Silvia: 1/70
+[2026-04-10 19:14:46]   Klonoa: 1/70
+[2026-04-10 19:14:46]   Delivering 15 videos for Annabelle...
+[2026-04-10 19:18:28]     Annabelle: 15 uploaded, 0 errors
+[2026-04-10 19:18:28]   Delivering 15 videos for Naomi...
+[2026-04-10 19:22:11]     Naomi: 15 uploaded, 0 errors
+[2026-04-10 19:22:11]   Delivering 15 videos for Silvia...
+[2026-04-10 19:26:15]     Silvia: 14 uploaded, 1 errors
+[2026-04-10 19:26:15]       ! V19: FFmpeg render failed
+[2026-04-10 19:26:15]   Delivering 15 videos for Klonoa...
+[2026-04-10 19:28:06]     Klonoa: 15 uploaded, 0 errors
+[2026-04-10 19:28:06] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 19:28:16] === Round 2: checking Drive counts ===
+[2026-04-10 19:28:19]   Annabelle: 16/105
+[2026-04-10 19:28:19]   Naomi: 16/28
+[2026-04-10 19:28:19]   Silvia: 15/70
+[2026-04-10 19:28:19]   Klonoa: 16/70
+[2026-04-10 19:28:19]   Delivering 15 videos for Annabelle...
+[2026-04-10 19:32:19]     Annabelle: 12 uploaded, 3 errors
+[2026-04-10 19:32:19]       ! V10: FFmpeg render failed
+[2026-04-10 19:32:19]       ! V03: FFmpeg render failed
+[2026-04-10 19:32:19]       ! V143: FFmpeg render failed
+[2026-04-10 19:32:19]   Delivering 12 videos for Naomi...
+[2026-04-10 19:35:00]     Naomi: 12 uploaded, 0 errors
+[2026-04-10 19:35:00]   Delivering 15 videos for Silvia...
+[2026-04-10 19:38:17]     Silvia: 15 uploaded, 0 errors
+[2026-04-10 19:38:17]   Delivering 15 videos for Klonoa...
+[2026-04-10 19:39:47]     Klonoa: 14 uploaded, 1 errors
+[2026-04-10 19:39:47]       ! V155: FFmpeg render failed
+[2026-04-10 19:39:47] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 19:39:57] === Round 3: checking Drive counts ===
+[2026-04-10 19:39:59]   Annabelle: 28/105
+[2026-04-10 19:39:59]   Naomi: 28/28
+[2026-04-10 19:39:59]   Silvia: 30/70
+[2026-04-10 19:39:59]   Klonoa: 30/70
+[2026-04-10 19:39:59]   Delivering 15 videos for Annabelle...
+[2026-04-10 19:43:32]     Annabelle: 14 uploaded, 1 errors
+[2026-04-10 19:43:32]       ! V10: FFmpeg render failed
+[2026-04-10 19:43:32]   Delivering 15 videos for Silvia...
+[2026-04-10 19:46:58]     Silvia: 15 uploaded, 0 errors
+[2026-04-10 19:46:58]   Delivering 15 videos for Klonoa...
+[2026-04-10 19:48:34]     Klonoa: 14 uploaded, 1 errors
+[2026-04-10 19:48:34]       ! V38: FFmpeg render failed
+[2026-04-10 19:48:34] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 19:48:44] === Round 4: checking Drive counts ===
+[2026-04-10 19:48:47]   Annabelle: 42/105
+[2026-04-10 19:48:47]   Naomi: 28/28
+[2026-04-10 19:48:47]   Silvia: 45/70
+[2026-04-10 19:48:47]   Klonoa: 44/70
+[2026-04-10 19:48:47]   Delivering 15 videos for Annabelle...
+[2026-04-10 19:53:00]     Annabelle: 15 uploaded, 0 errors
+[2026-04-10 19:53:00]   Delivering 15 videos for Silvia...
+[2026-04-10 19:56:08]     Silvia: 13 uploaded, 2 errors
+[2026-04-10 19:56:08]       ! V209: FFmpeg render failed
+[2026-04-10 19:56:08]       ! V205: FFmpeg render failed
+[2026-04-10 19:56:08]   Delivering 15 videos for Klonoa...
+[2026-04-10 19:57:51]     Klonoa: 15 uploaded, 0 errors
+[2026-04-10 19:57:51] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 19:58:01] === Round 5: checking Drive counts ===
+[2026-04-10 19:58:03]   Annabelle: 57/105
+[2026-04-10 19:58:03]   Naomi: 28/28
+[2026-04-10 19:58:03]   Silvia: 58/70
+[2026-04-10 19:58:03]   Klonoa: 59/70
+[2026-04-10 19:58:03]   Delivering 15 videos for Annabelle...
+[2026-04-10 20:02:36]     Annabelle: 15 uploaded, 0 errors
+[2026-04-10 20:02:36]   Delivering 12 videos for Silvia...
+[2026-04-10 20:05:35]     Silvia: 12 uploaded, 0 errors
+[2026-04-10 20:05:35]   Delivering 11 videos for Klonoa...
+[2026-04-10 20:06:45]     Klonoa: 11 uploaded, 0 errors
+[2026-04-10 20:06:45] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 20:06:55] === Round 6: checking Drive counts ===
+[2026-04-10 20:06:58]   Annabelle: 72/105
+[2026-04-10 20:06:58]   Naomi: 28/28
+[2026-04-10 20:06:58]   Silvia: 70/70
+[2026-04-10 20:06:58]   Klonoa: 70/70
+[2026-04-10 20:06:58]   Delivering 15 videos for Annabelle...
+[2026-04-10 20:10:23]     Annabelle: 14 uploaded, 1 errors
+[2026-04-10 20:10:23]       ! V06: FFmpeg render failed
+[2026-04-10 20:10:23] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 20:10:33] === Round 7: checking Drive counts ===
+[2026-04-10 20:10:36]   Annabelle: 86/105
+[2026-04-10 20:10:36]   Naomi: 28/28
+[2026-04-10 20:10:36]   Silvia: 70/70
+[2026-04-10 20:10:36]   Klonoa: 70/70
+[2026-04-10 20:10:36]   Delivering 15 videos for Annabelle...
+[2026-04-10 20:15:00]     Annabelle: 14 uploaded, 1 errors
+[2026-04-10 20:15:00]       ! V03: FFmpeg render failed
+[2026-04-10 20:15:00] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 20:15:10] === Round 8: checking Drive counts ===
+[2026-04-10 20:15:13]   Annabelle: 100/105
+[2026-04-10 20:15:13]   Naomi: 28/28
+[2026-04-10 20:15:13]   Silvia: 70/70
+[2026-04-10 20:15:13]   Klonoa: 70/70
+[2026-04-10 20:15:13]   Delivering 5 videos for Annabelle...
+[2026-04-10 20:16:18]     Annabelle: 5 uploaded, 0 errors
+[2026-04-10 20:16:18] Round complete. Rechecking Drive counts in 10s...
+[2026-04-10 20:16:28] === Round 9: checking Drive counts ===
+[2026-04-10 20:16:30]   Annabelle: 105/105
+[2026-04-10 20:16:30]   Naomi: 28/28
+[2026-04-10 20:16:30]   Silvia: 70/70
+[2026-04-10 20:16:30]   Klonoa: 70/70
+[2026-04-10 20:16:30] All targets met!
+[2026-04-10 20:16:30] === FINAL COUNTS ===
+[2026-04-10 20:16:32]   Annabelle: 105/105
+[2026-04-10 20:16:32]   Naomi: 28/28
+[2026-04-10 20:16:32]   Silvia: 70/70
+[2026-04-10 20:16:32]   Klonoa: 70/70

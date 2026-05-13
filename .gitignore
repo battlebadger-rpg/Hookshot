@@ -13,3 +13,14 @@ HookShot/venv/
 HookShot/batch_output/
 HookShot/telegram_pending.json
 HookShot/telegram_users.json
+
+cookies*.txt
+.claude/worktrees/interesting-keller/
+.claude/worktrees/romantic-mccarthy/
+.claude/worktrees/zen-chaum/
+HookShot/.claude/
+new content updates/
+test_renders/
+test_render_output.mp4
+*.db-shm
+*.db-wal
